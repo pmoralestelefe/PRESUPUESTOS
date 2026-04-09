@@ -153,33 +153,35 @@ function calcular(){
     m2: m2.toFixed(2), tipo: tipo, modelo: modelo, ancho: ancho, alto: alto, chapa: chapa
   };
 
-  // EMOJIS EN FORMATO URL-ENCODE PURO (No fallan en PC ni Móvil)
+  // LÓGICA DE EMOJIS COMPATIBLE CON WHATSAPP WEB Y MOBILE
+  // Usamos el DOM para convertir entidades HTML en texto real antes de mandarlo
+  function getEmoji(entity) {
+    const el = document.createElement("div");
+    el.innerHTML = entity;
+    return el.textContent;
+  }
+
   const e = {
-    wave: '%F0%9F%91%8B',
-    wrench: '%F0%9F%94%A7',
-    ruler: '%F0%9F%93%8F',
-    gear: '%E2%9A%99%EF%B8%8F',
-    check: '%E2%9C%94%EF%B8%8F',
-    bolt: '%E2%9A%A1',
-    money: '%F0%9F%92%B0',
-    spark: '%E2%9C%A8'
+    wave: getEmoji("&#128075;"),
+    wrench: getEmoji("&#128295;"),
+    ruler: getEmoji("&#128207;"),
+    gear: getEmoji("&#9881;"),
+    check: getEmoji("&#10004;"),
+    bolt: getEmoji("&#9889;"),
+    money: getEmoji("&#128176;"),
+    spark: getEmoji("&#10024;")
   };
 
-  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || "cliente"}, ¡un gusto! ` + decodeURIComponent(e.wave) + `
-
-Soy *Emanuel* de *Portones Automáticos Córdoba*. Diseñé esta propuesta para tu hogar:
-
-` + decodeURIComponent(e.wrench) + ` *Proyecto:* Portón ${tipo.toUpperCase()}
-` + decodeURIComponent(e.ruler) + ` *Medidas:* ${ancho}m x ${alto}m
-` + decodeURIComponent(e.gear) + ` *Material:* Chapa del ${chapa}
-` + decodeURIComponent(e.check) + ` *Incluye:* Fabricación, instalación y garantía.
-
-${motorActivo === "si" ? decodeURIComponent(e.bolt) + ` *Automatización:* Motor ${modelo} de alto tránsito.` : "💡 Preparado para motorizar en el futuro."}
-
-` + decodeURIComponent(e.money) + ` *INVERSIÓN TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}
-
-La comodidad de entrar a casa con un clic no tiene precio. ` + decodeURIComponent(e.spark) + `
-¿Querés que coordinemos una visita para cerrar los detalles?`;
+  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || "cliente"}, ¡un gusto! ${e.wave}\n\n` +
+  `Soy *Emanuel* de *Portones Automáticos Córdoba*. Diseñé esta propuesta para tu hogar:\n\n` +
+  `${e.wrench} *Proyecto:* Portón ${tipo.toUpperCase()}\n` +
+  `${e.ruler} *Medidas:* ${ancho}m x ${alto}m\n` +
+  `${e.gear} *Material:* Chapa del ${chapa}\n` +
+  `${e.check} *Incluye:* Fabricación, instalación y garantía.\n\n` +
+  (motorActivo === "si" ? `${e.bolt} *Automatización:* Motor ${modelo} de alto tránsito.\n` : "💡 Preparado para motorizar en el futuro.\n") +
+  `\n${e.money} *INVERSIÓN TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}\n\n` +
+  `La comodidad de entrar a casa con un clic no tiene precio. ${e.spark}\n` +
+  `¿Querés que coordinemos una visita para cerrar los detalles?`;
 
   const resDiv = document.getElementById('resultado');
   resDiv.style.display = 'block';
@@ -191,8 +193,9 @@ function enviarWhatsApp(){
   if(!window.mensajeWPP) { alert("Calculá primero"); return; }
   if(!numero) { alert("Ingresá el número"); return; }
   
-  // Aquí usamos la codificación de URI para que el link lleve los emojis listos para WhatsApp Web
-  let url = `https://wa.me/54${numero}?text=${encodeURIComponent(window.mensajeWPP)}`;
+  // Limpiamos el texto para asegurar que los saltos de línea y emojis viajen seguros
+  let textoFinal = window.mensajeWPP;
+  let url = `https://wa.me/54${numero}?text=${encodeURIComponent(textoFinal)}`;
   window.open(url, '_blank');
 }
 
