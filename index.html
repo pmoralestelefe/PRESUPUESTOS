@@ -153,32 +153,30 @@ function calcular(){
     m2: m2.toFixed(2), tipo: tipo, modelo: modelo, ancho: ancho, alto: alto, chapa: chapa
   };
 
-  // 🛠 SISTEMA ANTIFALLO DE EMOJIS
-  const e = {
-    wave: String.fromCodePoint(0x1F44B),
-    wrench: String.fromCodePoint(0x1F527),
-    ruler: String.fromCodePoint(0x1F4CF),
-    hammer: String.fromCodePoint(0x1F6E0),
-    check: String.fromCodePoint(0x2714),
-    bolt: String.fromCodePoint(0x26A1),
-    money: String.fromCodePoint(0x1F4B0),
-    spark: String.fromCodePoint(0x2728)
-  };
+  // EMOJIS CON CODIFICACIÓN SEGURA PARA WHATSAPP
+  const e_wave = decodeURIComponent('%F0%9F%91%8B');
+  const e_wrench = decodeURIComponent('%F0%9F%94%A7');
+  const e_ruler = decodeURIComponent('%F0%9F%93%8F');
+  const e_hammer = decodeURIComponent('%F0%9F%9B%A0');
+  const e_check = decodeURIComponent('%E2%9C%94');
+  const e_bolt = decodeURIComponent('%E2%9A%A1');
+  const e_money = decodeURIComponent('%F0%9F%92%B0');
+  const e_spark = decodeURIComponent('%E2%9C%A8');
 
-  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || "cliente"}, ¡un gusto! ${e.wave}
+  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || "cliente"}, ¡un gusto! ${e_wave}
 
 Soy *Emanuel* de *Portones Automáticos Córdoba*. Diseñé esta propuesta para tu hogar:
 
-${e.wrench} *Proyecto:* Portón ${tipo.toUpperCase()}
-${e.ruler} *Medidas:* ${ancho}m x ${alto}m
-${e.hammer} *Material:* Chapa del ${chapa}
-${e.check} *Incluye:* Fabricación, instalación y garantía.
+${e_wrench} *Proyecto:* Portón ${tipo.toUpperCase()}
+${e_ruler} *Medidas:* ${ancho}m x ${alto}m
+${e_hammer} *Material:* Chapa del ${chapa}
+${e_check} *Incluye:* Fabricación, instalación y garantía.
 
-${motorActivo === "si" ? `${e.bolt} *Automatización:* Motor ${modelo} de alto tránsito.` : "💡 Preparado para motorizar en el futuro."}
+${motorActivo === "si" ? `${e_bolt} *Automatización:* Motor ${modelo} de alto tránsito.` : "💡 Preparado para motorizar en el futuro."}
 
-${e.money} *INVERSIÓN TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}
+${e_money} *INVERSIÓN TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}
 
-La comodidad de entrar a casa con un clic no tiene precio. ${e.spark}
+La comodidad de entrar a casa con un clic no tiene precio. ${e_spark}
 ¿Querés que coordinemos una visita para cerrar los detalles?`;
 
   const resDiv = document.getElementById('resultado');
@@ -215,28 +213,38 @@ function generarPDF(){
     doc.text(`ASESOR: EMANUEL`, 150, 72);
     doc.setDrawColor(59, 130, 246); doc.line(20, 75, 190, 75);
 
+    // DATOS TÉCNICOS IMPORTANTES (REINTEGRADOS)
     doc.setFontSize(14); doc.setFont("helvetica", "bold");
     doc.text("DETALLES TÉCNICOS:", 20, 90);
     doc.setFont("helvetica", "normal"); doc.setFontSize(11);
-    let textoVenta = `Sistema diseñado bajo medidas de ${window.detalle.ancho}m x ${window.detalle.alto}m utilizando materiales de alta durabilidad (Chapa ${window.detalle.chapa}) para garantizar seguridad y confort.`;
-    doc.text(doc.splitTextToSize(textoVenta, 170), 20, 100);
+    
+    doc.text(`- Tipo de Portón: ${window.detalle.tipo.toUpperCase()}`, 25, 100);
+    doc.text(`- Medidas: ${window.detalle.ancho}m x ${window.detalle.alto}m`, 25, 107);
+    doc.text(`- Material: Estructura en Chapa del ${window.detalle.chapa}`, 25, 114);
+    if(window.detalle.motor > 0) {
+      doc.text(`- Automatización: Motor ${window.detalle.modelo} de alto tránsito`, 25, 121);
+    } else {
+      doc.text(`- Automatización: Preparado para futura motorización`, 25, 121);
+    }
+    doc.text(`- Servicio: Fabricación, entrega e instalación profesional`, 25, 128);
 
-    // REINTEGRADA SECCIÓN POR QUÉ ELEGIRNOS
-    doc.setFillColor(241, 245, 249); doc.rect(20, 115, 170, 30, 'F');
-    doc.setFont("helvetica", "bold"); doc.text("POR QUÉ ELEGIRNOS:", 25, 125);
+    // SECCIÓN POR QUÉ ELEGIRNOS
+    doc.setFillColor(241, 245, 249); doc.rect(20, 138, 170, 28, 'F');
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+    doc.text("POR QUÉ ELEGIRNOS:", 25, 145);
     doc.setFont("helvetica", "normal"); doc.setFontSize(10);
-    doc.text("• Especialistas en Córdoba: Acompañamos cada etapa del proyecto.", 25, 132);
-    doc.text("• Materiales Certificados: Chapa de espesor real y motores de alta gama.", 25, 138);
-    doc.text("• Garantía y Post-Venta: Estamos presentes ante cualquier necesidad técnica.", 25, 144);
+    doc.text("• Especialistas en Córdoba: Acompañamos cada etapa del proyecto.", 25, 151);
+    doc.text("• Calidad Garantizada: Materiales certificados y servicio post-venta.", 25, 157);
 
-    doc.setDrawColor(34, 197, 94); doc.rect(20, 160, 170, 35);
+    // CUADRO DE INVERSIÓN
+    doc.setDrawColor(34, 197, 94); doc.rect(20, 175, 170, 35);
     doc.setFontSize(11); doc.setFont("helvetica", "bold");
-    doc.text("INVERSIÓN TOTAL DEL PROYECTO:", 105, 170, {align: 'center'});
+    doc.text("INVERSIÓN TOTAL DEL PROYECTO:", 105, 185, {align: 'center'});
     doc.setFontSize(24); doc.setTextColor(21, 128, 61);
-    doc.text(`$${window.detalle.total.toLocaleString('es-AR')}`, 105, 185, {align: 'center'});
+    doc.text(`$${window.detalle.total.toLocaleString('es-AR')}`, 105, 200, {align: 'center'});
     
     doc.setTextColor(100, 100, 100); doc.setFontSize(10); doc.setFont("helvetica", "italic");
-    doc.text("¡Comencemos hoy mismo a transformar tu ingreso!", 105, 230, {align: 'center'});
+    doc.text("¡Comencemos hoy mismo a transformar tu ingreso!", 105, 240, {align: 'center'});
     doc.save(`Propuesta_${document.getElementById('cliente').value}.pdf`);
   };
 }
