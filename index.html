@@ -89,12 +89,12 @@
       <div class="full"><label>Extras ($)</label><input id="extras" type="number"></div>
     </div>
 
-    <button class="main btn-green" onclick="calcular()">CALCULAR Y GUARDAR</button>
+    <button class="main btn-green" onclick="calcular()">GENERAR PROPUESTA GANADORA</button>
     <div id="resultado" class="card" style="display:none"></div>
     
     <div class="grid-form" style="margin-top:10px">
       <button class="main btn-blue" onclick="enviarWhatsApp()">Enviar WhatsApp</button>
-      <button class="main btn-gray" onclick="generarPDF()">Descargar PDF</button>
+      <button class="main btn-gray" onclick="generarPDF()">Descargar Propuesta PDF</button>
     </div>
   </div>
 
@@ -124,18 +124,12 @@ function actualizarInterfaz() {
   document.getElementById('div_precio').style.display = (motor !== 'no') ? 'block' : 'none';
   document.getElementById('div_peso').style.display = (motor === 'solo_inst') ? 'block' : 'none';
 
-  // Lógica de visibilidad Levadizo Especial
   const esLevEspecial = (tipo === 'levadizo' && ancho > 2.60 && motor === 'solo_inst');
   document.getElementById('config_especial_lev').style.display = esLevEspecial ? 'block' : 'none';
 
-  // Ajuste de labels informativo para Corredizo Pesado
   const labelMotor = document.getElementById('label_precio_motor');
   if(motor === 'solo_inst') {
-    if(tipo === 'corredizo' && peso === 'pesado') {
-        labelMotor.innerText = "Precio del Motor ($)";
-    } else if (tipo === 'corredizo') {
-        labelMotor.innerText = "Costo Motor (Informativo)";
-    }
+    labelMotor.innerText = (tipo === 'corredizo' && peso === 'pesado') ? "Precio del Motor ($)" : "Costo Motor (Informativo)";
     document.getElementById('dolar').style.opacity = "0.3";
   } else {
     labelMotor.innerText = "Precio Motor ($)";
@@ -154,7 +148,7 @@ function calcular(){
   let motorModo = document.getElementById('motor').value;
   let peso = document.getElementById('peso_porton').value;
 
-  if(!ancho || !alto || !cliente){ alert("Faltan datos."); return; }
+  if(!ancho || !alto || !cliente){ alert("Por favor, completa los datos del cliente y medidas."); return; }
 
   let totalFinal = 0;
   let subtexto = "";
@@ -162,42 +156,31 @@ function calcular(){
   if(motorModo === 'solo_inst'){
     if(tipo === 'corredizo'){
       if(peso === 'pesado'){
-        // LÓGICA CORREDIZO PESADO: 200k MO + Motor + Metros extras
-        let baseMO = 200000;
-        let extrasM = (ancho > 3) ? (ancho - 3) * 30000 : 0;
-        totalFinal = baseMO + num('precio_motor') + extrasM;
-        subtexto = "Automatización Corredizo Pesado";
+        totalFinal = 200000 + num('precio_motor') + ((ancho > 3) ? (ancho - 3) * 30000 : 0);
+        subtexto = "Upgrade de Seguridad: Automatización Corredizo Pesado";
       } else {
-        // LÓGICA LIVIANO (PAQUETE)
-        let basePaquete = 400000;
-        let extrasM = (ancho > 3) ? (ancho - 3) * 30000 : 0;
-        totalFinal = basePaquete + extrasM;
-        subtexto = "Automatización Corredizo Liviano";
+        totalFinal = 400000 + ((ancho > 3) ? (ancho - 3) * 30000 : 0);
+        subtexto = "Confort Diario: Automatización Corredizo Liviano";
       }
-    } 
-    else { // LEVADIZO
+    } else {
       if(ancho > 2.60){
         let cant = parseInt(document.getElementById('cant_motores').value);
         let sist = document.getElementById('sistema_tipo').value;
-        let manoObra = (cant === 2) ? 350000 : 200000;
-        totalFinal = manoObra + (num('precio_motor') * cant);
-        subtexto = `Automatización Levadizo ${sist} (${cant} motor/es)`;
+        totalFinal = ((cant === 2) ? 350000 : 200000) + (num('precio_motor') * cant);
+        subtexto = `Sistema de Alto Desempeño: Levadizo ${sist} (${cant} mot.)`;
       } else {
         totalFinal = 400000;
         subtexto = "Automatización Levadizo Estándar";
       }
     }
     totalFinal += num('extras');
-  } 
-  else { // FABRICACIÓN
-    if(!dolar) { alert("Ingresá el dólar."); return; }
-    let m2 = ancho * alto;
-    let usdPorM2 = (tipo==="levadizo") ? 145.41 : 157.24; 
-    let basePesos = m2 * usdPorM2 * dolar;
+  } else {
+    if(!dolar) { alert("Necesito el valor del dólar para cotizar fabricación."); return; }
+    let basePesos = ancho * alto * (tipo==="levadizo" ? 145.41 : 157.24) * dolar;
     let costoPorton = (motorModo === "no") ? basePesos * 1.3 : basePesos;
-    let costoMotorYInstalacion = (motorModo === "si") ? (num('precio_motor') + 200000) : 0;
-    totalFinal = Math.round(costoPorton + costoMotorYInstalacion + num('extras'));
-    subtexto = `Fabricación de portón ${tipo}`;
+    let costoMotor = (motorModo === "si") ? (num('precio_motor') + 200000) : 0;
+    totalFinal = Math.round(costoPorton + costoMotor + num('extras'));
+    subtexto = `Fabricación Integral de Portón ${tipo}`;
   }
 
   window.detalle = {
@@ -210,29 +193,31 @@ function calcular(){
   h.unshift(window.detalle);
   localStorage.setItem('presupuestos', JSON.stringify(h.slice(0, 50)));
 
-  window.mensajeWPP = `Hola ${cliente}, ¡un gusto! 👋\n\n` +
-  `Soy *Emanuel* de *Portones Automáticos Córdoba*. Propuesta técnica:\n\n` +
-  `⚙ *Servicio:* ${subtexto}\n` +
-  `📏 *Medidas:* ${ancho}m x ${alto}m\n` +
-  (window.detalle.modelo ? `⚡ *Motor:* ${window.detalle.modelo}\n` : "") +
-  `💰 *INVERSIÓN TOTAL:* $${totalFinal.toLocaleString('es-AR')}\n\n` +
-  `¿Te gustaría que coordinemos una visita? ✨`;
+  // WHATSAPP OPTIMIZADO PARA VENTAS
+  window.mensajeWPP = `Hola ${cliente}, ¡un gusto saludarte! 👋\n\n` +
+  `Soy *Emanuel* de *Portones Automáticos Córdoba*. Analicé tu requerimiento y esta es la mejor solución para tu hogar:\n\n` +
+  `⭐ *Proyecto:* ${subtexto}\n` +
+  `📏 *Dimensión:* ${ancho}m x ${alto}m\n` +
+  (window.detalle.modelo ? `⚡ *Tecnología:* Motor ${window.detalle.modelo}\n` : "") +
+  `✅ *Tu inversión incluye:* Equipo seleccionado por su durabilidad, instalación técnica certificada y puesta a punto final.\n\n` +
+  `💰 *VALOR TOTAL:* $${totalFinal.toLocaleString('es-AR')}\n\n` +
+  `*¿Te gustaría que agendemos una visita técnica para validar los detalles y comenzar?* 🚀`;
 
   document.getElementById('resultado').style.display = 'block';
-  document.getElementById('resultado').innerHTML = `<strong>Total: $${totalFinal.toLocaleString('es-AR')}</strong><br><small>Guardado en historial</small>`;
+  document.getElementById('resultado').innerHTML = `<strong>Propuesta generada por $${totalFinal.toLocaleString('es-AR')}</strong><br><small>Lista para enviar</small>`;
 }
 
 function cargarHistorial() {
   const lista = document.getElementById('lista-historial');
   const datos = JSON.parse(localStorage.getItem('presupuestos') || "[]");
-  lista.innerHTML = datos.length === 0 ? "<p style='text-align:center'>No hay registros.</p>" : "";
+  lista.innerHTML = datos.length === 0 ? "<p style='text-align:center'>Historial vacío.</p>" : "";
   datos.forEach((p, index) => {
     lista.innerHTML += `<div class="historial-item">
       <div class="historial-header"><span>${p.cliente}</span><span style="color:var(--green)">$${p.total.toLocaleString('es-AR')}</span></div>
-      <div class="historial-body">${p.fecha} | ${p.subtexto}<br>Tel: ${p.tel}</div>
+      <div class="historial-body">${p.fecha} | ${p.subtexto}</div>
       <div class="historial-actions">
-        <a href="https://wa.me/54${p.tel}" target="_blank" class="btn-sm btn-green">WPP</a>
-        <button onclick="eliminarUno(${index})" class="btn-sm btn-gray" style="background:#ef4444">X</button>
+        <a href="https://wa.me/54${p.tel}" target="_blank" class="btn-sm btn-green">ENVIAR</a>
+        <button onclick="eliminarUno(${index})" class="btn-sm btn-gray">X</button>
       </div>
     </div>`;
   });
@@ -245,7 +230,7 @@ function eliminarUno(index) {
   cargarHistorial();
 }
 
-function borrarHistorial() { if(confirm("¿Borrar todo?")) { localStorage.removeItem('presupuestos'); cargarHistorial(); } }
+function borrarHistorial() { if(confirm("¿Seguro quieres vaciar el historial?")) { localStorage.removeItem('presupuestos'); cargarHistorial(); } }
 
 function enviarWhatsApp(){
   if(!window.mensajeWPP) return;
@@ -258,25 +243,50 @@ function generarPDF(){
   const doc = new jsPDF();
   const img = new Image(); img.src = 'icono.png';
   img.onload = function(){
+    // Header Visual
     doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 50, 'F');
     doc.addImage(img, 'PNG', 15, 10, 30, 30);
-    doc.setTextColor(255, 255, 255); doc.setFontSize(22); doc.setFont("helvetica", "bold");
-    doc.text("PROPUESTA DE VALOR", 55, 25);
-    doc.setTextColor(0,0,0); doc.setFontSize(11);
+    doc.setTextColor(255, 255, 255); doc.setFontSize(20); doc.setFont("helvetica", "bold");
+    doc.text("PROPUESTA TÉCNICA", 55, 22);
+    doc.setFontSize(10); doc.setFont("helvetica", "normal");
+    doc.text("Soluciones en Confort y Seguridad", 55, 30);
+    
+    // Datos Cliente
+    doc.setTextColor(30, 41, 59); doc.setFontSize(12); doc.setFont("helvetica", "bold");
     doc.text(`PARA: ${window.detalle.cliente.toUpperCase()}`, 20, 65);
-    doc.text(`FECHA: ${window.detalle.fecha}`, 150, 65);
-    doc.setDrawColor(59, 130, 246); doc.line(20, 75, 190, 75);
-    doc.setFontSize(14); doc.setFont("helvetica", "bold");
-    doc.text("DETALLES DEL SERVICIO:", 20, 90);
-    doc.setFont("helvetica", "normal"); doc.setFontSize(11);
-    doc.text(`- Servicio: ${window.detalle.subtexto}`, 25, 100);
-    doc.text(`- Medidas: ${window.detalle.ancho}m x ${window.detalle.alto}m`, 25, 107);
-    if(window.detalle.modelo) doc.text(`- Motor: ${window.detalle.modelo}`, 25, 114);
-    doc.text(`- Incluye: Provisión, instalación y garantía profesional`, 25, 121);
-    doc.setDrawColor(34, 197, 94); doc.rect(20, 175, 170, 35);
-    doc.text("INVERSIÓN TOTAL:", 105, 185, {align: 'center'});
-    doc.setFontSize(24); doc.setTextColor(21, 128, 61);
-    doc.text(`$${window.detalle.total.toLocaleString('es-AR')}`, 105, 200, {align: 'center'});
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+    doc.text(`Fecha de emisión: ${window.detalle.fecha}`, 145, 65);
+    doc.setDrawColor(59, 130, 246); doc.setLineWidth(0.5); doc.line(20, 70, 190, 70);
+    
+    // Descripción del Valor
+    doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.setTextColor(59, 130, 246);
+    doc.text("ESPECIFICACIONES DEL PROYECTO", 20, 85);
+    
+    doc.setTextColor(30, 41, 59); doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+    doc.text(`• Solución: ${window.detalle.subtexto}`, 25, 95);
+    doc.text(`• Dimensiones: ${window.detalle.ancho}m (ancho) x ${window.detalle.alto}m (alto)`, 25, 105);
+    if(window.detalle.modelo) doc.text(`• Tecnología: Motor ${window.detalle.modelo} (Elegido por rendimiento)`, 25, 115);
+    
+    // Beneficios (Psicología de ventas)
+    doc.setFontSize(12); doc.setFont("helvetica", "bold"); doc.setTextColor(59, 130, 246);
+    doc.text("LO QUE INCLUYE TU INVERSIÓN", 20, 135);
+    doc.setTextColor(30, 41, 59); doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+    doc.text("- Mano de obra técnica especializada con terminación premium.", 25, 145);
+    doc.text("- Instalación y configuración de dispositivos de seguridad.", 25, 152);
+    doc.text("- Garantía de funcionamiento y soporte post-venta.", 25, 159);
+    
+    // Cuadro de Inversión
+    doc.setFillColor(248, 250, 252); doc.rect(20, 175, 170, 40, 'F');
+    doc.setDrawColor(34, 197, 94); doc.rect(20, 175, 170, 40);
+    doc.setTextColor(30, 41, 59); doc.setFontSize(11);
+    doc.text("INVERSIÓN FINAL LLAVE EN MANO", 105, 188, {align: 'center'});
+    doc.setFontSize(26); doc.setTextColor(21, 128, 61); doc.setFont("helvetica", "bold");
+    doc.text(`$${window.detalle.total.toLocaleString('es-AR')}`, 105, 205, {align: 'center'});
+    
+    // Pie de página
+    doc.setFontSize(9); doc.setTextColor(148, 163, 184); doc.setFont("helvetica", "italic");
+    doc.text("Portones Automáticos Córdoba - Profesionales en Aperturas.", 105, 280, {align: 'center'});
+    
     doc.save(`Propuesta_${window.detalle.cliente}.pdf`);
   };
 }
