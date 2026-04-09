@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Presupuestos PRO</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f172a">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body { font-family: Arial; margin:0; background:#0f172a; color:#fff; }
+header { padding:15px; text-align:center; background:#020617; font-size:20px; }
+.container { padding:15px; max-width:500px; margin:auto; }
+
+input, select {
+  width:100%; padding:10px; margin:6px 0;
+  border-radius:8px; border:none;
+}
+
+button {
+  padding:12px; width:100%; margin-top:10px;
+  border:none; border-radius:8px; font-weight:bold;
+}
+
+.btn-green { background:#22c55e; color:#000; }
+.btn-blue { background:#3b82f6; color:#fff; }
+.btn-gray { background:#475569; color:#fff; }
+
+.card { background:#1e293b; padding:10px; border-radius:8px; margin-top:10px; }
+</style>
+</head>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+
+<body>
+
+<header>Presupuestos PRO</header>
+
+<div class="container">
+
+<input id="cliente" placeholder="Cliente">
+<input id="telefono" placeholder="WhatsApp">
+
+<select id="tipo">
+<option value="corredizo">Portón Corredizo</option>
+<option value="levadizo">Portón Levadizo</option>
+</select>
+
+<input id="ancho" placeholder="Ancho (m)">
+<input id="alto" placeholder="Alto (m)">
+
+<select id="chapa">
+<option value="18">Chapa 18</option>
+<option value="20">Chapa 20</option>
+</select>
+
+<input id="dolar" placeholder="Valor dólar ($)">
+
+<select id="motor">
+<option value="no">Sin motor</option>
+<option value="si">Con motor</option>
+</select>
+
+<input id="modelo_motor" placeholder="Modelo motor">
+<input id="precio_motor" placeholder="Precio motor">
+
+<input id="extras" placeholder="Extras ($)">
+
+<button class="btn-green" onclick="calcular()">Calcular</button>
+
+<div id="resultado" class="card"></div>
+
+<button class="btn-blue" onclick="enviarWhatsApp()">Enviar por WhatsApp</button>
+<button class="btn-gray" onclick="generarPDF()">Ver PDF PRO</button>
+
+</div>
+
+<script>
+
+// PRECIO M2
+function getPrecioM2(tipo, chapa){
+  if(tipo==="levadizo") return chapa==="18"?145.41:123.13;
+  return chapa==="18"?157.24:110.06;
+}
+
+function num(id){
+  return parseFloat(document.getElementById(id).value)||0;
+}
+
+// 🔥 CALCULO CORRECTO
+function calcular(){
+
+  let tipo = document.getElementById('tipo').value;
+  let chapa = document.getElementById('chapa').value;
+  let ancho = num('ancho');
+  let alto = num('alto');
+  let dolar = num('dolar');
+
+  if(!ancho || !alto || !dolar){
+    alert("Faltan datos");
+    return;
+  }
+
+  let m2 = ancho * alto;
+  let usd = getPrecioM2(tipo,chapa);
+  let base = m2 * usd * dolar;
+
+  let motorActivo = document.getElementById('motor').value;
+  let modelo = document.getElementById('modelo_motor').value;
+
+  let totalPorton = 0;
+
+  if(motorActivo === "no"){
+    totalPorton = base * 1.3;
+  } else {
+    totalPorton = base;
+  }
+
+  let totalMotor = 0;
+
+  if(motorActivo === "si"){
+    totalMotor = num('precio_motor') + 200000;
+  }
+
+  let extras = num('extras');
+
+  window.detalle = {
+    porton: Math.round(totalPorton),
+    motor: Math.round(totalMotor),
+    extras: Math.round(extras),
+    total: Math.round(totalPorton + totalMotor + extras),
+    m2: m2.toFixed(2),
+    tipo: tipo,
+    modelo: modelo
+  };
+
+  // MENSAJE WPP
+  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || ""}, ¿cómo estás?
+
+Te paso el presupuesto 👇
+
+🔧 ${tipo}
+📏 Medidas: ${ancho}m x ${alto}m (${window.detalle.m2} m²)
+
+✔ Fabricación completa
+✔ Instalación incluida
+
+${motorActivo === "si" ? `⚙ Incluye motor ${modelo}` : ""}
+
+💰 TOTAL FINAL: $${window.detalle.total}
+
+Si te parece bien, coordinamos 👍`;
+
+  document.getElementById('resultado').innerHTML = `
+    Portón: $${window.detalle.porton}<br>
+    Motor: $${window.detalle.motor}<br>
+    Extras: $${window.detalle.extras}<br><br>
+    <b>TOTAL: $${window.detalle.total}</b>
+  `;
+}
+
+// WHATSAPP
+function enviarWhatsApp(){
+
+  let numero = document.getElementById('telefono').value;
+
+  if(!window.mensajeWPP){
+    alert("Primero calculá");
+    return;
+  }
+
+  if(!numero){
+    alert("Falta número");
+    return;
+  }
+
+  let url = `https://wa.me/54${numero}?text=${encodeURIComponent(window.mensajeWPP)}`;
+  window.open(url, '_blank');
+}
+
+// PDF PRO
+function generarPDF(){
+
+  if(!window.detalle){
+    alert("Calculá primero");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  let y = 20;
+
+  doc.setFontSize(16);
+  doc.text("PRESUPUESTO", 80, y);
+
+  y+=10;
+
+  doc.setFontSize(11);
+  doc.text(`Cliente: ${document.getElementById('cliente').value}`, 10, y);
+
+  y+=15;
+
+  // PORTON
+  doc.rect(10, y, 190, 35);
+  doc.text("PORTÓN", 15, y+8);
+  doc.text(`$${window.detalle.porton}`, 15, y+20);
+
+  y+=45;
+
+  // MOTOR
+  if(window.detalle.motor>0){
+    doc.rect(10, y, 190, 30);
+    doc.text("AUTOMATIZACIÓN", 15, y+8);
+    doc.text(`$${window.detalle.motor}`, 15, y+20);
+    y+=40;
+  }
+
+  // EXTRAS
+  if(window.detalle.extras>0){
+    doc.rect(10, y, 190, 25);
+    doc.text("EXTRAS", 15, y+10);
+    doc.text(`$${window.detalle.extras}`, 120, y+10);
+    y+=35;
+  }
+
+  // TOTAL
+  doc.rect(10, y, 190, 30);
+  doc.setFontSize(14);
+  doc.text(`TOTAL FINAL: $${window.detalle.total}`, 15, y+18);
+
+  doc.output('dataurlnewwindow');
+}
+
+</script>
+
+</body>
+</html>
