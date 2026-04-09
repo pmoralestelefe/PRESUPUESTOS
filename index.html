@@ -55,14 +55,14 @@
     <div class="grid-form">
       <div class="full"><label>Cliente</label><input id="cliente" placeholder="Nombre completo"></div>
       <div><label>WhatsApp</label><input id="telefono" type="tel" placeholder="351xxxxxxx"></div>
-      <div><label>Tipo de Portón</label><select id="tipo"><option value="corredizo">Corredizo</option><option value="levadizo">Levadizo</option></select></div>
+      <div><label>Tipo de Portón</label><select id="tipo" onchange="toggleMotor()"><option value="corredizo">Corredizo</option><option value="levadizo">Levadizo</option></select></div>
       <div><label>Ancho (m)</label><input id="ancho" type="number" step="0.01"></div>
       <div><label>Alto (m)</label><input id="alto" type="number" step="0.01"></div>
-      <div><label>Dólar ($)</label><input id="dolar" type="number"></div>
+      <div><label id="label_dolar">Dólar ($)</label><input id="dolar" type="number"></div>
       
       <div class="full"><label>Servicio de Motor</label>
         <select id="motor" onchange="toggleMotor()">
-          <option value="no">Sin motor</option>
+          <option value="no">Sin motor (Sólo Portón)</option>
           <option value="si">Fabricación + Automatización</option>
           <option value="solo_inst">Sólo Instalación (Portón existente)</option>
         </select>
@@ -78,7 +78,7 @@
 
       <div id="div_modelo" style="display:none"><label>Modelo Motor</label><input id="modelo_motor" placeholder="Ej: PPA 1/4 HP"></div>
       <div id="div_precio" style="display:none"><label>Precio Motor ($)</label><input id="precio_motor" type="number"></div>
-      <div class="full"><label>Extras ($)</label><input id="extras" type="number"></div>
+      <div class="full"><label>Extras / Adicionales ($)</label><input id="extras" type="number"></div>
     </div>
 
     <button class="main btn-green" onclick="calcular()">CALCULAR Y GUARDAR</button>
@@ -112,6 +112,14 @@ function toggleMotor() {
   document.getElementById('div_modelo').style.display = (m !== 'no') ? 'block' : 'none';
   document.getElementById('div_precio').style.display = (m !== 'no') ? 'block' : 'none';
   document.getElementById('div_lev_extra').style.display = (m === 'solo_inst' && tipo === 'levadizo') ? 'block' : 'none';
+  
+  const dField = document.getElementById('dolar');
+  const dLabel = document.getElementById('label_dolar');
+  if(m === 'solo_inst') {
+    dField.style.opacity = "0.3"; dLabel.style.opacity = "0.3";
+  } else {
+    dField.style.opacity = "1"; dLabel.style.opacity = "1";
+  }
 }
 
 function num(id){ return parseFloat(document.getElementById(id).value)||0; }
@@ -124,38 +132,45 @@ function calcular(){
   let dolar = num('dolar');
   let motorModo = document.getElementById('motor').value;
 
-  if(!ancho || !alto || !cliente || (motorModo !== 'solo_inst' && !dolar)){ 
-    alert("Por favor completa los datos principales."); return; 
-  }
+  if(!ancho || !alto || !cliente){ alert("Faltan datos del cliente o medidas."); return; }
 
   let totalServicio = 0;
   let subtexto = "";
 
-  // LÓGICA SÓLO INSTALACIÓN
   if(motorModo === 'solo_inst'){
+    // PRECIOS FIJOS SIN DÓLAR Y SIN MARGEN DEL 30%
     let baseInstalacion = 400000;
+    
     if(tipo === 'corredizo'){
-      let extrasM = (ancho > 3) ? (ancho - 3) * 30000 : 0;
-      totalServicio = baseInstalacion + extrasM;
+      let metrosExtras = (ancho > 3) ? (ancho - 3) : 0;
+      totalServicio = baseInstalacion + (metrosExtras * 30000);
+      subtexto = "Instalación de Motor (Corredizo)";
     } else {
       let condicion = document.getElementById('lev_condicion').value;
       if(ancho > 2.60 || condicion === 'pesado'){
-        totalServicio = 520000; // Ajuste sugerido para casos pesados/anchos
+        totalServicio = 520000; 
+        subtexto = "Instalación de Motor (Levadizo Especial)";
       } else {
         totalServicio = baseInstalacion;
+        subtexto = "Instalación de Motor (Levadizo)";
       }
     }
+    // Suma directa de motor y extras en pesos
     totalServicio += num('precio_motor') + num('extras');
-    subtexto = "Automatización de portón existente";
+    
   } else {
-    // LÓGICA FABRICACIÓN (Se mantiene tu fórmula original)
+    // FABRICACIÓN (Sigue llevando el dólar y el margen del 30% si no hay motor)
+    if(!dolar) { alert("Ingresá el valor del dólar."); return; }
     let m2 = ancho * alto;
-    let usd = (tipo==="levadizo") ? 145.41 : 157.24; // Chapa 18 por defecto
-    let base = m2 * usd * dolar;
-    let totalPorton = (motorModo === "no") ? base * 1.3 : base;
+    let usdPorM2 = (tipo==="levadizo") ? 145.41 : 157.24; 
+    let basePesos = m2 * usdPorM2 * dolar;
+    
+    // Si no lleva motor, se aplica el 30% de margen al portón
+    let totalPorton = (motorModo === "no") ? basePesos * 1.3 : basePesos;
     let totalMotor = (motorModo === "si") ? num('precio_motor') + 200000 : 0;
+    
     totalServicio = Math.round(totalPorton + totalMotor + num('extras'));
-    subtexto = `Fabricación de portón ${tipo}`;
+    subtexto = `Fabricación Portón ${tipo}`;
   }
 
   window.detalle = {
@@ -164,20 +179,18 @@ function calcular(){
     fecha: new Date().toLocaleDateString(), modelo: document.getElementById('modelo_motor').value
   };
 
-  // Guardar
   let h = JSON.parse(localStorage.getItem('presupuestos') || "[]");
   h.unshift(window.detalle);
   localStorage.setItem('presupuestos', JSON.stringify(h.slice(0, 50)));
 
-  // Mensaje
   window.mensajeWPP = `Hola ${cliente}, ¡un gusto! 👋\n\n` +
-  `Soy *Emanuel* de *Portones Automáticos Córdoba*. Propuesta para tu portón:\n\n` +
+  `Soy *Emanuel* de *Portones Automáticos Córdoba*. Propuesta técnica:\n\n` +
   `⚙ *Servicio:* ${subtexto}\n` +
   `📏 *Medidas:* ${ancho}m x ${alto}m\n` +
   (window.detalle.modelo ? `⚡ *Motor:* ${window.detalle.modelo}\n` : "") +
-  `✔ *Incluye:* Instalación técnica y puesta a punto.\n\n` +
+  `✔ *Incluye:* Mano de obra especializada e instalación.\n\n` +
   `💰 *INVERSIÓN TOTAL:* $${totalServicio.toLocaleString('es-AR')}\n\n` +
-  `¿Querés que coordinemos una visita para ver el portón? ✨`;
+  `¿Te gustaría que coordinemos una visita? ✨`;
 
   const resDiv = document.getElementById('resultado');
   resDiv.style.display = 'block';
@@ -245,7 +258,5 @@ function generarPDF(){
   };
 }
 </script>
-</body>
-</html>
 </body>
 </html>
