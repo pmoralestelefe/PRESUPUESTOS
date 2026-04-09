@@ -153,31 +153,27 @@ function calcular(){
     m2: m2.toFixed(2), tipo: tipo, modelo: modelo, ancho: ancho, alto: alto, chapa: chapa
   };
 
-  // SISTEMA DE EMOJIS MEDIANTE CÓDIGOS HEXADECIMALES (NO FALLA)
-  const wave = "\uD83D\uDC4B";
-  const wrench = "\uD83D\uDD27";
-  const ruler = "\uD83D\uDCCF";
-  const gear = "\u2699\uFE0F";
-  const check = "\u2714\uFE0F";
-  const bolt = "\u26A1";
-  const money = "\uD83D\uDCB0";
-  const sparkles = "\u2728";
+  // LÓGICA DE WHATSAPP (URL ENCODING) - Los emojis se generan al enviar el link
+  let m_wave = "%F0%9F%91%8B";
+  let m_wrench = "%F0%9F%94%A7";
+  let m_ruler = "%F0%9F%93%8F";
+  let m_gear = "%E2%9A%99%EF%B8%8F";
+  let m_check = "%E2%9C%94%EF%B8%8F";
+  let m_bolt = "%E2%9A%A1";
+  let m_money = "%F0%9F%92%B0";
+  let m_spark = "%E2%9C%A8";
 
-  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || "cliente"}, ¡un gusto! ` + wave + `
-
-Soy *Emanuel* de *Portones Automáticos Córdoba*. Diseñé esta propuesta para tu hogar:
-
-` + wrench + ` *Proyecto:* Portón ${tipo.toUpperCase()}
-` + ruler + ` *Medidas:* ${ancho}m x ${alto}m
-` + gear + ` *Material:* Chapa del ${chapa}
-` + check + ` *Incluye:* Fabricación, instalación y garantía.
-
-${motorActivo === "si" ? bolt + ` *Automatización:* Motor ${modelo} de alto tránsito.` : "💡 Preparado para motorizar en el futuro."}
-
-` + money + ` *INVERSIÓN TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}
-
-La comodidad de entrar a casa con un clic no tiene precio. ` + sparkles + `
-¿Querés que coordinemos una visita para cerrar los detalles?`;
+  // Construcción del mensaje usando los códigos que WhatsApp sí entiende
+  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || "cliente"}, ¡un gusto! ` + decodeURIComponent(m_wave) + `\n\n` +
+  `Soy *Emanuel* de *Portones Automáticos Córdoba*. Diseñé esta propuesta para tu hogar:\n\n` +
+  decodeURIComponent(m_wrench) + ` *Proyecto:* Portón ${tipo.toUpperCase()}\n` +
+  decodeURIComponent(m_ruler) + ` *Medidas:* ${ancho}m x ${alto}m\n` +
+  decodeURIComponent(m_gear) + ` *Material:* Chapa del ${chapa}\n` +
+  decodeURIComponent(m_check) + ` *Incluye:* Fabricación, instalación y garantía.\n\n` +
+  (motorActivo === "si" ? decodeURIComponent(m_bolt) + ` *Automatización:* Motor ${modelo} de alto tránsito.\n` : "💡 Preparado para motorizar en el futuro.\n") +
+  `\n` + decodeURIComponent(m_money) + ` *INVERSIÓN TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}\n\n` +
+  `La comodidad de entrar a casa con un clic no tiene precio. ` + decodeURIComponent(m_spark) + `\n` +
+  `¿Querés que coordinemos una visita para cerrar los detalles?`;
 
   const resDiv = document.getElementById('resultado');
   resDiv.style.display = 'block';
@@ -188,6 +184,7 @@ function enviarWhatsApp(){
   let numero = document.getElementById('telefono').value;
   if(!window.mensajeWPP) { alert("Calculá primero"); return; }
   if(!numero) { alert("Ingresá el número"); return; }
+  // Aquí es donde sucede la magia: encodeURIComponent de un mensaje que ya tiene los emojis decodificados técnicamente
   let url = `https://wa.me/54${numero}?text=${encodeURIComponent(window.mensajeWPP)}`;
   window.open(url, '_blank');
 }
