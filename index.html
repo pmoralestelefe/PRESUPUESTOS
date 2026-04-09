@@ -26,14 +26,28 @@
     line-height: 1.6;
   }
 
+  /* HEADER CON LOGO A LA IZQUIERDA */
   header { 
-    padding: 20px; 
-    text-align: center; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 15px; 
     background: #020617; 
-    font-size: 20px; 
-    font-weight: bold;
-    letter-spacing: 1px;
     border-bottom: 2px solid var(--accent);
+  }
+
+  header img {
+    height: 40px; /* Tamaño del logo en el titulo */
+    width: auto;
+    border-radius: 4px;
+  }
+
+  header h1 {
+    font-size: 18px;
+    margin: 0;
+    font-weight: bold;
+    letter-spacing: 0.5px;
   }
 
   .container { 
@@ -54,7 +68,7 @@
     .full-width { grid-column: span 2; }
   }
 
-  label { font-size: 13px; color: #94a3b8; display: block; margin-bottom: 5px; text-transform: uppercase; font-weight: 600; }
+  label { font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px; text-transform: uppercase; font-weight: 600; }
 
   input, select {
     width: 100%; 
@@ -73,6 +87,7 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    margin-top: 20px;
   }
 
   @media (min-width: 600px) {
@@ -102,7 +117,6 @@
     border-radius: 12px; 
     margin-top: 20px; 
     border: 1px solid #334155;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   }
 
   .res-item { display: flex; justify-content: space-between; margin-bottom: 8px; }
@@ -118,7 +132,10 @@
 
 <body>
 
-<header>Portones Automáticos Córdoba</header>
+<header>
+  <img src="icono.png" alt="Logo">
+  <h1>Portones Automáticos Córdoba</h1>
+</header>
 
 <div class="container">
   
@@ -129,8 +146,8 @@
     </div>
     
     <div>
-      <label>WhatsApp (ej: 3512345678)</label>
-      <input id="telefono" type="tel" placeholder="Sin el 0 ni el 15">
+      <label>WhatsApp</label>
+      <input id="telefono" type="tel" placeholder="351xxxxxxx">
     </div>
 
     <div>
@@ -142,12 +159,12 @@
     </div>
 
     <div>
-      <label>Ancho (metros)</label>
+      <label>Ancho (m)</label>
       <input id="ancho" type="number" step="0.01" placeholder="3.00">
     </div>
 
     <div>
-      <label>Alto (metros)</label>
+      <label>Alto (m)</label>
       <input id="alto" type="number" step="0.01" placeholder="2.00">
     </div>
 
@@ -179,7 +196,7 @@
 
     <div id="div_precio" style="display:none">
       <label>Precio Motor ($)</label>
-      <input id="precio_motor" type="number" placeholder="Costo del motor">
+      <input id="precio_motor" type="number" placeholder="Costo motor">
     </div>
 
     <div class="full-width">
@@ -192,8 +209,8 @@
 
   <div id="resultado" class="card" style="display:none"></div>
 
-  <div class="actions" style="margin-top:20px">
-    <button class="btn-blue" onclick="enviarWhatsApp()">Enviar WhatsApp de Venta</button>
+  <div class="actions">
+    <button class="btn-blue" onclick="enviarWhatsApp()">Enviar WhatsApp</button>
     <button class="btn-gray" onclick="generarPDF()">Generar Propuesta PDF</button>
   </div>
 
@@ -249,29 +266,38 @@ function calcular(){
     chapa: chapa
   };
 
-  // 🚀 MENSAJE DE WHATSAPP ORIENTADO A VENTAS
-  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || "cliente"}, ¡un gusto saludarte! 👋
+  // 🛠 SOLUCIÓN EMOJIS: Usando códigos Unicode para evitar errores de rombos
+  const wave = "\uD83D\uDC4B";
+  const wrench = "\uD83D\uDD27";
+  const ruler = "\uD83D\uDCCF";
+  const hammer = "\uD83D\uDEE0";
+  const check = "\u2714";
+  const bolt = "\u26A1";
+  const money = "\uD83D\uDCB0";
+  const spark = "\u2728";
 
-Soy *Emanuel* de *Portones Automáticos Córdoba*. Según lo que conversamos, diseñé una propuesta para mejorar la seguridad y comodidad de tu casa:
+  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || "cliente"}, ¡un gusto saludarte! ${wave}
 
-✅ *Proyecto:* Fabricación de Portón ${tipo.toUpperCase()}
-📏 *Medidas:* ${ancho}m x ${alto}m
-🛠 *Material Premium:* Chapa reforzada del ${chapa}
-✔ *Incluye:* Entrega, instalación profesional y garantía de fabricación.
+Soy *Emanuel* de *Portones Automáticos Córdoba*. Diseñé esta propuesta para mejorar la seguridad y confort de tu hogar:
 
-${motorActivo === "si" ? `⚡ *Confort Total:* Incluye sistema de automatización con motor ${modelo} para que no tengas que bajarte del auto.` : "💡 *Nota:* Este presupuesto es para el portón manual (listo para automatizar en el futuro)."}
+${wrench} *Proyecto:* Fabricación de Portón ${tipo.toUpperCase()}
+${ruler} *Medidas:* ${ancho}m x ${alto}m
+${hammer} *Material:* Chapa reforzada del ${chapa}
+${check} *Incluye:* Entrega, instalación profesional y garantía.
 
-💰 *INVERSIÓN TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}
+${motorActivo === "si" ? `${bolt} *Confort Total:* Incluye motor ${modelo} de alto tránsito.` : "💡 *Nota:* Preparado para automatizar en el futuro."}
 
-Lo mejor de este sistema es la tranquilidad de entrar a tu casa con un solo clic. 🏠✨
+${money} *INVERSIÓN TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}
 
-¿Te parece que coordinemos una visita técnica para cerrar los detalles?`;
+Lo mejor de este sistema es la tranquilidad de entrar a casa con un solo clic. ${spark}
+
+¿Te gustaría que coordinemos una visita para cerrar los detalles?`;
 
   const resDiv = document.getElementById('resultado');
   resDiv.style.display = 'block';
   resDiv.innerHTML = `
     <div class="res-item"><span>Estructura:</span> <span>$${window.detalle.porton.toLocaleString('es-AR')}</span></div>
-    <div class="res-item"><span>Motor/Automatización:</span> <span>$${window.detalle.motor.toLocaleString('es-AR')}</span></div>
+    <div class="res-item"><span>Motorización:</span> <span>$${window.detalle.motor.toLocaleString('es-AR')}</span></div>
     <div class="res-item"><span>Adicionales:</span> <span>$${window.detalle.extras.toLocaleString('es-AR')}</span></div>
     <div class="res-item total-row"><span>INVERSIÓN FINAL:</span> <span>$${window.detalle.total.toLocaleString('es-AR')}</span></div>
   `;
@@ -280,27 +306,22 @@ Lo mejor de este sistema es la tranquilidad de entrar a tu casa con un solo clic
 function enviarWhatsApp(){
   let numero = document.getElementById('telefono').value;
   if(!window.mensajeWPP) { alert("Calculá primero"); return; }
-  if(!numero) { alert("Ingresá un número de WhatsApp"); return; }
+  if(!numero) { alert("Ingresá el número"); return; }
   let url = `https://wa.me/54${numero}?text=${encodeURIComponent(window.mensajeWPP)}`;
   window.open(url, '_blank');
 }
 
-// 📄 PDF ORIENTADO A VENTAS
 function generarPDF(){
   if(!window.detalle){ alert("Calculá primero"); return; }
-  
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
   const img = new Image();
   img.src = 'icono.png';
   
   img.onload = function(){
-    // Header profesional
     doc.setFillColor(15, 23, 42);
     doc.rect(0, 0, 210, 50, 'F');
-    
     doc.addImage(img, 'PNG', 15, 10, 30, 30);
-    
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(22);
     doc.setFont("helvetica", "bold");
@@ -308,79 +329,47 @@ function generarPDF(){
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
     doc.text("Seguridad y Confort para tu Hogar", 55, 33);
-
-    // Datos de contacto y cliente
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(11);
     doc.text(`PARA: ${document.getElementById('cliente').value.toUpperCase()}`, 20, 65);
     doc.text(`FECHA: ${new Date().toLocaleDateString()}`, 150, 65);
     doc.text(`ASESOR: EMANUEL`, 150, 72);
-
     doc.setDrawColor(59, 130, 246);
-    doc.setLineWidth(0.5);
     doc.line(20, 75, 190, 75);
-
-    // Texto Persuasivo
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
     doc.text("DETALLES DEL PROYECTO:", 20, 90);
-    
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
-    let textoVenta = `Este sistema ha sido diseñado específicamente bajo medidas de ${window.detalle.ancho}m x ${window.detalle.alto}m utilizando materiales de alta durabilidad (Chapa ${window.detalle.chapa}) para garantizar la máxima seguridad de su propiedad y la fluidez en el acceso diario.`;
+    let textoVenta = `Este sistema ha sido diseñado bajo medidas de ${window.detalle.ancho}m x ${window.detalle.alto}m utilizando materiales de alta durabilidad (Chapa ${window.detalle.chapa}) para garantizar la máxima seguridad y fluidez en el acceso.`;
     let lineas = doc.splitTextToSize(textoVenta, 170);
     doc.text(lineas, 20, 100);
-
-    // Especificaciones
     doc.setFont("helvetica", "bold");
     doc.text("• Estructura:", 25, 120);
     doc.setFont("helvetica", "normal");
     doc.text(`Portón ${window.detalle.tipo} reforzado.`, 60, 120);
-
     if(window.detalle.motor > 0) {
       doc.setFont("helvetica", "bold");
       doc.text("• Automatización:", 25, 128);
       doc.setFont("helvetica", "normal");
-      doc.text(`Sistema con motor ${window.detalle.modelo} de alto tránsito.`, 65, 128);
+      doc.text(`Sistema con motor ${window.detalle.modelo}.`, 65, 128);
     }
-
     doc.setFont("helvetica", "bold");
     doc.text("• Instalación:", 25, 136);
     doc.setFont("helvetica", "normal");
-    doc.text("Servicio llave en mano con puesta a punto profesional.", 60, 136);
-
-    // Beneficios
-    doc.setFillColor(241, 245, 249);
-    doc.rect(20, 145, 170, 25, 'F');
-    doc.setFont("helvetica", "bold");
-    doc.text("POR QUÉ ELEGIRNOS:", 25, 153);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.text("- Calidad de materiales certificada.  - Especialistas en Córdoba.  - Garantía post-venta.", 25, 160);
-
-    // Cuadro de Inversión
+    doc.text("Servicio llave en mano con puesta a punto.", 60, 136);
     doc.setDrawColor(34, 197, 94);
-    doc.setLineWidth(1);
-    doc.rect(20, 180, 170, 35);
-    
+    doc.rect(20, 160, 170, 35);
     doc.setFontSize(11);
-    doc.setTextColor(50, 50, 50);
-    doc.text("INVERSIÓN TOTAL DEL PROYECTO:", 105, 190, {align: 'center'});
-    
+    doc.text("INVERSIÓN TOTAL DEL PROYECTO:", 105, 170, {align: 'center'});
     doc.setFontSize(24);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(21, 128, 61);
-    doc.text(`$${window.detalle.total.toLocaleString('es-AR')}`, 105, 205, {align: 'center'});
-
-    // Cierre
+    doc.text(`$${window.detalle.total.toLocaleString('es-AR')}`, 105, 185, {align: 'center'});
     doc.setTextColor(100, 100, 100);
     doc.setFontSize(10);
-    doc.setFont("helvetica", "italic");
-    doc.text("Precios sujetos a variaciones según cotización del dólar.", 105, 230, {align: 'center'});
-    doc.setFont("helvetica", "bold");
-    doc.text("¡Comencemos hoy mismo a transformar tu ingreso!", 105, 240, {align: 'center'});
-
-    doc.save(`Propuesta_Comercial_${document.getElementById('cliente').value}.pdf`);
+    doc.text("¡Comencemos hoy mismo a transformar tu ingreso!", 105, 230, {align: 'center'});
+    doc.save(`Propuesta_${document.getElementById('cliente').value}.pdf`);
   };
 }
 </script>
