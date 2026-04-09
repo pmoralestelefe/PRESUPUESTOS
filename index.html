@@ -55,30 +55,38 @@
     <div class="grid-form">
       <div class="full"><label>Cliente</label><input id="cliente" placeholder="Nombre completo"></div>
       <div><label>WhatsApp</label><input id="telefono" type="tel" placeholder="351xxxxxxx"></div>
-      <div><label>Tipo de Portón</label><select id="tipo" onchange="toggleMotor()"><option value="corredizo">Corredizo</option><option value="levadizo">Levadizo</option></select></div>
-      <div><label>Ancho (m)</label><input id="ancho" type="number" step="0.01"></div>
+      <div><label>Tipo de Portón</label><select id="tipo" onchange="actualizarInterfaz()"><option value="corredizo">Corredizo</option><option value="levadizo">Levadizo</option></select></div>
+      <div><label>Ancho (m)</label><input id="ancho" type="number" step="0.01" oninput="actualizarInterfaz()"></div>
       <div><label>Alto (m)</label><input id="alto" type="number" step="0.01"></div>
       <div><label id="label_dolar">Dólar ($)</label><input id="dolar" type="number"></div>
       
       <div class="full"><label>Servicio de Motor</label>
-        <select id="motor" onchange="toggleMotor()">
+        <select id="motor" onchange="actualizarInterfaz()">
           <option value="no">Sin motor (Sólo Portón)</option>
           <option value="si">Fabricación + Automatización</option>
           <option value="solo_inst">Sólo Instalación (Portón existente)</option>
         </select>
       </div>
 
-      <div id="div_lev_extra" style="display:none" class="full">
-        <label>Condición Levadizo</label>
-        <select id="lev_condicion">
+      <div id="div_peso" class="full" style="display:none">
+        <label>Peso / Tracción del Portón</label>
+        <select id="peso_porton" onchange="actualizarInterfaz()">
           <option value="liviano">Liviano (Estándar)</option>
-          <option value="pesado">Pesado / Torsión</option>
+          <option value="pesado">Pesado (Industrial / Grande)</option>
         </select>
       </div>
 
-      <div id="div_modelo" style="display:none"><label>Modelo Motor</label><input id="modelo_motor" placeholder="Ej: PPA 1/4 HP"></div>
-      <div id="div_precio" style="display:none"><label>Precio Motor ($)</label><input id="precio_motor" type="number"></div>
-      <div class="full"><label>Extras / Adicionales ($)</label><input id="extras" type="number"></div>
+      <div id="config_especial_lev" style="display:none" class="full card">
+        <label style="color:var(--accent)">Configuración Levadizo Grande</label>
+        <div class="grid-form" style="margin-top:10px">
+          <div><label>Cantidad Motores</label><select id="cant_motores"><option value="1">1 Motor</option><option value="2">2 Motores</option></select></div>
+          <div><label>Tipo Sistema</label><select id="sistema_tipo"><option value="Levante">Sistema Levante</option><option value="Torsion">Sistema Torsión</option></select></div>
+        </div>
+      </div>
+
+      <div id="div_modelo" style="display:none"><label>Modelo Motor</label><input id="modelo_motor" placeholder="Ej: PPA Jet Flex"></div>
+      <div id="div_precio" style="display:none"><label id="label_precio_motor">Precio Unitario Motor ($)</label><input id="precio_motor" type="number"></div>
+      <div class="full"><label>Extras ($)</label><input id="extras" type="number"></div>
     </div>
 
     <button class="main btn-green" onclick="calcular()">CALCULAR Y GUARDAR</button>
@@ -106,19 +114,32 @@ function switchTab(tab) {
   if(tab === 'historial') cargarHistorial();
 }
 
-function toggleMotor() {
-  const m = document.getElementById('motor').value;
+function actualizarInterfaz() {
+  const motor = document.getElementById('motor').value;
   const tipo = document.getElementById('tipo').value;
-  document.getElementById('div_modelo').style.display = (m !== 'no') ? 'block' : 'none';
-  document.getElementById('div_precio').style.display = (m !== 'no') ? 'block' : 'none';
-  document.getElementById('div_lev_extra').style.display = (m === 'solo_inst' && tipo === 'levadizo') ? 'block' : 'none';
-  
-  const dField = document.getElementById('dolar');
-  const dLabel = document.getElementById('label_dolar');
-  if(m === 'solo_inst') {
-    dField.style.opacity = "0.3"; dLabel.style.opacity = "0.3";
+  const ancho = parseFloat(document.getElementById('ancho').value) || 0;
+  const peso = document.getElementById('peso_porton').value;
+
+  document.getElementById('div_modelo').style.display = (motor !== 'no') ? 'block' : 'none';
+  document.getElementById('div_precio').style.display = (motor !== 'no') ? 'block' : 'none';
+  document.getElementById('div_peso').style.display = (motor === 'solo_inst') ? 'block' : 'none';
+
+  // Lógica de visibilidad Levadizo Especial
+  const esLevEspecial = (tipo === 'levadizo' && ancho > 2.60 && motor === 'solo_inst');
+  document.getElementById('config_especial_lev').style.display = esLevEspecial ? 'block' : 'none';
+
+  // Ajuste de labels informativo para Corredizo Pesado
+  const labelMotor = document.getElementById('label_precio_motor');
+  if(motor === 'solo_inst') {
+    if(tipo === 'corredizo' && peso === 'pesado') {
+        labelMotor.innerText = "Precio del Motor ($)";
+    } else if (tipo === 'corredizo') {
+        labelMotor.innerText = "Costo Motor (Informativo)";
+    }
+    document.getElementById('dolar').style.opacity = "0.3";
   } else {
-    dField.style.opacity = "1"; dLabel.style.opacity = "1";
+    labelMotor.innerText = "Precio Motor ($)";
+    document.getElementById('dolar').style.opacity = "1";
   }
 }
 
@@ -131,51 +152,57 @@ function calcular(){
   let alto = num('alto');
   let dolar = num('dolar');
   let motorModo = document.getElementById('motor').value;
+  let peso = document.getElementById('peso_porton').value;
 
-  if(!ancho || !alto || !cliente){ alert("Faltan datos del cliente o medidas."); return; }
+  if(!ancho || !alto || !cliente){ alert("Faltan datos."); return; }
 
-  let totalServicio = 0;
+  let totalFinal = 0;
   let subtexto = "";
 
   if(motorModo === 'solo_inst'){
-    // PRECIOS FIJOS SIN DÓLAR Y SIN MARGEN DEL 30%
-    let baseInstalacion = 400000;
-    
     if(tipo === 'corredizo'){
-      let metrosExtras = (ancho > 3) ? (ancho - 3) : 0;
-      totalServicio = baseInstalacion + (metrosExtras * 30000);
-      subtexto = "Instalación de Motor (Corredizo)";
-    } else {
-      let condicion = document.getElementById('lev_condicion').value;
-      if(ancho > 2.60 || condicion === 'pesado'){
-        totalServicio = 520000; 
-        subtexto = "Instalación de Motor (Levadizo Especial)";
+      if(peso === 'pesado'){
+        // LÓGICA CORREDIZO PESADO: 200k MO + Motor + Metros extras
+        let baseMO = 200000;
+        let extrasM = (ancho > 3) ? (ancho - 3) * 30000 : 0;
+        totalFinal = baseMO + num('precio_motor') + extrasM;
+        subtexto = "Automatización Corredizo Pesado";
       } else {
-        totalServicio = baseInstalacion;
-        subtexto = "Instalación de Motor (Levadizo)";
+        // LÓGICA LIVIANO (PAQUETE)
+        let basePaquete = 400000;
+        let extrasM = (ancho > 3) ? (ancho - 3) * 30000 : 0;
+        totalFinal = basePaquete + extrasM;
+        subtexto = "Automatización Corredizo Liviano";
+      }
+    } 
+    else { // LEVADIZO
+      if(ancho > 2.60){
+        let cant = parseInt(document.getElementById('cant_motores').value);
+        let sist = document.getElementById('sistema_tipo').value;
+        let manoObra = (cant === 2) ? 350000 : 200000;
+        totalFinal = manoObra + (num('precio_motor') * cant);
+        subtexto = `Automatización Levadizo ${sist} (${cant} motor/es)`;
+      } else {
+        totalFinal = 400000;
+        subtexto = "Automatización Levadizo Estándar";
       }
     }
-    // Suma directa de motor y extras en pesos
-    totalServicio += num('precio_motor') + num('extras');
-    
-  } else {
-    // FABRICACIÓN (Sigue llevando el dólar y el margen del 30% si no hay motor)
-    if(!dolar) { alert("Ingresá el valor del dólar."); return; }
+    totalFinal += num('extras');
+  } 
+  else { // FABRICACIÓN
+    if(!dolar) { alert("Ingresá el dólar."); return; }
     let m2 = ancho * alto;
     let usdPorM2 = (tipo==="levadizo") ? 145.41 : 157.24; 
     let basePesos = m2 * usdPorM2 * dolar;
-    
-    // Si no lleva motor, se aplica el 30% de margen al portón
-    let totalPorton = (motorModo === "no") ? basePesos * 1.3 : basePesos;
-    let totalMotor = (motorModo === "si") ? num('precio_motor') + 200000 : 0;
-    
-    totalServicio = Math.round(totalPorton + totalMotor + num('extras'));
-    subtexto = `Fabricación Portón ${tipo}`;
+    let costoPorton = (motorModo === "no") ? basePesos * 1.3 : basePesos;
+    let costoMotorYInstalacion = (motorModo === "si") ? (num('precio_motor') + 200000) : 0;
+    totalFinal = Math.round(costoPorton + costoMotorYInstalacion + num('extras'));
+    subtexto = `Fabricación de portón ${tipo}`;
   }
 
   window.detalle = {
     cliente, tel: document.getElementById('telefono').value,
-    tipo, ancho, alto, total: totalServicio, subtexto,
+    tipo, ancho, alto, total: totalFinal, subtexto,
     fecha: new Date().toLocaleDateString(), modelo: document.getElementById('modelo_motor').value
   };
 
@@ -188,29 +215,26 @@ function calcular(){
   `⚙ *Servicio:* ${subtexto}\n` +
   `📏 *Medidas:* ${ancho}m x ${alto}m\n` +
   (window.detalle.modelo ? `⚡ *Motor:* ${window.detalle.modelo}\n` : "") +
-  `✔ *Incluye:* Mano de obra especializada e instalación.\n\n` +
-  `💰 *INVERSIÓN TOTAL:* $${totalServicio.toLocaleString('es-AR')}\n\n` +
+  `💰 *INVERSIÓN TOTAL:* $${totalFinal.toLocaleString('es-AR')}\n\n` +
   `¿Te gustaría que coordinemos una visita? ✨`;
 
-  const resDiv = document.getElementById('resultado');
-  resDiv.style.display = 'block';
-  resDiv.innerHTML = `<strong>Total: $${totalServicio.toLocaleString('es-AR')}</strong><br><small>Guardado en historial</small>`;
+  document.getElementById('resultado').style.display = 'block';
+  document.getElementById('resultado').innerHTML = `<strong>Total: $${totalFinal.toLocaleString('es-AR')}</strong><br><small>Guardado en historial</small>`;
 }
 
 function cargarHistorial() {
   const lista = document.getElementById('lista-historial');
   const datos = JSON.parse(localStorage.getItem('presupuestos') || "[]");
-  lista.innerHTML = datos.length === 0 ? "<p style='text-align:center'>No hay presupuestos guardados.</p>" : "";
+  lista.innerHTML = datos.length === 0 ? "<p style='text-align:center'>No hay registros.</p>" : "";
   datos.forEach((p, index) => {
-    lista.innerHTML += `
-      <div class="historial-item">
-        <div class="historial-header"><span>${p.cliente}</span><span style="color:var(--green)">$${p.total.toLocaleString('es-AR')}</span></div>
-        <div class="historial-body">${p.fecha} | ${p.subtexto}<br>Medidas: ${p.ancho}x${p.alto} | Tel: ${p.tel}</div>
-        <div class="historial-actions">
-          <a href="https://wa.me/54${p.tel}" target="_blank" class="btn-sm btn-green">WPP</a>
-          <button onclick="eliminarUno(${index})" class="btn-sm btn-gray" style="background:#ef4444">X</button>
-        </div>
-      </div>`;
+    lista.innerHTML += `<div class="historial-item">
+      <div class="historial-header"><span>${p.cliente}</span><span style="color:var(--green)">$${p.total.toLocaleString('es-AR')}</span></div>
+      <div class="historial-body">${p.fecha} | ${p.subtexto}<br>Tel: ${p.tel}</div>
+      <div class="historial-actions">
+        <a href="https://wa.me/54${p.tel}" target="_blank" class="btn-sm btn-green">WPP</a>
+        <button onclick="eliminarUno(${index})" class="btn-sm btn-gray" style="background:#ef4444">X</button>
+      </div>
+    </div>`;
   });
 }
 
@@ -232,8 +256,7 @@ function generarPDF(){
   if(!window.detalle) return;
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  const img = new Image();
-  img.src = 'icono.png';
+  const img = new Image(); img.src = 'icono.png';
   img.onload = function(){
     doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 50, 'F');
     doc.addImage(img, 'PNG', 15, 10, 30, 30);
@@ -247,14 +270,14 @@ function generarPDF(){
     doc.text("DETALLES DEL SERVICIO:", 20, 90);
     doc.setFont("helvetica", "normal"); doc.setFontSize(11);
     doc.text(`- Servicio: ${window.detalle.subtexto}`, 25, 100);
-    doc.text(`- Medidas del Portón: ${window.detalle.ancho}m x ${window.detalle.alto}m`, 25, 107);
-    if(window.detalle.modelo) doc.text(`- Automatización: Motor ${window.detalle.modelo}`, 25, 114);
-    doc.text(`- Incluye: Mano de obra especializada e instalación profesional`, 25, 121);
+    doc.text(`- Medidas: ${window.detalle.ancho}m x ${window.detalle.alto}m`, 25, 107);
+    if(window.detalle.modelo) doc.text(`- Motor: ${window.detalle.modelo}`, 25, 114);
+    doc.text(`- Incluye: Provisión, instalación y garantía profesional`, 25, 121);
     doc.setDrawColor(34, 197, 94); doc.rect(20, 175, 170, 35);
     doc.text("INVERSIÓN TOTAL:", 105, 185, {align: 'center'});
     doc.setFontSize(24); doc.setTextColor(21, 128, 61);
     doc.text(`$${window.detalle.total.toLocaleString('es-AR')}`, 105, 200, {align: 'center'});
-    doc.save(`Presupuesto_${window.detalle.cliente}.pdf`);
+    doc.save(`Propuesta_${window.detalle.cliente}.pdf`);
   };
 }
 </script>
