@@ -188,13 +188,13 @@
     </div>
   </div>
 
-  <button class="btn-green" onclick="calcular()">CALCULAR AHORA</button>
+  <button class="btn-green" onclick="calcular()">CALCULAR PRESUPUESTO</button>
 
   <div id="resultado" class="card" style="display:none"></div>
 
   <div class="actions" style="margin-top:20px">
-    <button class="btn-blue" onclick="enviarWhatsApp()">Enviar WhatsApp</button>
-    <button class="btn-gray" onclick="generarPDF()">Generar PDF con Logo</button>
+    <button class="btn-blue" onclick="enviarWhatsApp()">Enviar WhatsApp de Venta</button>
+    <button class="btn-gray" onclick="generarPDF()">Generar Propuesta PDF</button>
   </div>
 
 </div>
@@ -221,7 +221,7 @@ function calcular(){
   let dolar = num('dolar');
 
   if(!ancho || !alto || !dolar){
-    alert("Faltan datos obligatorios (Medidas o Dólar)");
+    alert("Faltan datos obligatorios");
     return;
   }
 
@@ -249,113 +249,138 @@ function calcular(){
     chapa: chapa
   };
 
-  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || ""}, ¡buen día!
-Soy Emanuel de *Portones Automáticos Córdoba*. Te paso el presupuesto:
+  // 🚀 MENSAJE DE WHATSAPP ORIENTADO A VENTAS
+  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || "cliente"}, ¡un gusto saludarte! 👋
 
-🔧 *Trabajo: Portón* ${tipo.toUpperCase()}
-📏 *Medidas:* ${ancho}m x ${alto}m (${window.detalle.m2} m²)
-🛠 *Material:* Chapa ${chapa}
-✔ Incluye instalación y puesta a punto.
+Soy *Emanuel* de *Portones Automáticos Córdoba*. Según lo que conversamos, diseñé una propuesta para mejorar la seguridad y comodidad de tu casa:
 
-${motorActivo === "si" ? `⚙ *Automatización:* Motor ${modelo}` : ""}
+✅ *Proyecto:* Fabricación de Portón ${tipo.toUpperCase()}
+📏 *Medidas:* ${ancho}m x ${alto}m
+🛠 *Material Premium:* Chapa reforzada del ${chapa}
+✔ *Incluye:* Entrega, instalación profesional y garantía de fabricación.
 
-💰 *PRECIO TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}
+${motorActivo === "si" ? `⚡ *Confort Total:* Incluye sistema de automatización con motor ${modelo} para que no tengas que bajarte del auto.` : "💡 *Nota:* Este presupuesto es para el portón manual (listo para automatizar en el futuro)."}
 
-¿Te gustaría coordinar una visita para confirmar detalles?`;
+💰 *INVERSIÓN TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}
+
+Lo mejor de este sistema es la tranquilidad de entrar a tu casa con un solo clic. 🏠✨
+
+¿Te parece que coordinemos una visita técnica para cerrar los detalles?`;
 
   const resDiv = document.getElementById('resultado');
   resDiv.style.display = 'block';
   resDiv.innerHTML = `
-    <div class="res-item"><span>Portón:</span> <span>$${window.detalle.porton.toLocaleString('es-AR')}</span></div>
-    <div class="res-item"><span>Motor:</span> <span>$${window.detalle.motor.toLocaleString('es-AR')}</span></div>
-    <div class="res-item"><span>Extras:</span> <span>$${window.detalle.extras.toLocaleString('es-AR')}</span></div>
-    <div class="res-item total-row"><span>TOTAL:</span> <span>$${window.detalle.total.toLocaleString('es-AR')}</span></div>
+    <div class="res-item"><span>Estructura:</span> <span>$${window.detalle.porton.toLocaleString('es-AR')}</span></div>
+    <div class="res-item"><span>Motor/Automatización:</span> <span>$${window.detalle.motor.toLocaleString('es-AR')}</span></div>
+    <div class="res-item"><span>Adicionales:</span> <span>$${window.detalle.extras.toLocaleString('es-AR')}</span></div>
+    <div class="res-item total-row"><span>INVERSIÓN FINAL:</span> <span>$${window.detalle.total.toLocaleString('es-AR')}</span></div>
   `;
 }
 
 function enviarWhatsApp(){
   let numero = document.getElementById('telefono').value;
-  if(!window.mensajeWPP) { alert("Calculá el presupuesto primero"); return; }
-  if(!numero) { alert("Ingresá un número de teléfono"); return; }
+  if(!window.mensajeWPP) { alert("Calculá primero"); return; }
+  if(!numero) { alert("Ingresá un número de WhatsApp"); return; }
   let url = `https://wa.me/54${numero}?text=${encodeURIComponent(window.mensajeWPP)}`;
   window.open(url, '_blank');
 }
 
-// NUEVA FUNCIÓN PDF CON LOGO
+// 📄 PDF ORIENTADO A VENTAS
 function generarPDF(){
   if(!window.detalle){ alert("Calculá primero"); return; }
   
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
-  
-  // Cargamos la imagen icono.png
   const img = new Image();
   img.src = 'icono.png';
   
   img.onload = function(){
-    // Encabezado con color
+    // Header profesional
     doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, 210, 45, 'F');
+    doc.rect(0, 0, 210, 50, 'F');
     
-    // Logo (esquina superior izquierda)
-    doc.addImage(img, 'PNG', 15, 7, 30, 30);
+    doc.addImage(img, 'PNG', 15, 10, 30, 30);
     
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(20);
-    doc.text("PORTONES AUTOMÁTICOS", 60, 22);
-    doc.setFontSize(14);
-    doc.text("CÓRDOBA", 60, 30);
-
-    // Datos del cliente
-    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.text("PROPUESTA DE VALOR", 55, 25);
     doc.setFontSize(12);
-    doc.text(`CLIENTE: ${document.getElementById('cliente').value.toUpperCase()}`, 20, 60);
-    doc.text(`FECHA: ${new Date().toLocaleDateString()}`, 150, 60);
+    doc.setFont("helvetica", "normal");
+    doc.text("Seguridad y Confort para tu Hogar", 55, 33);
+
+    // Datos de contacto y cliente
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(11);
+    doc.text(`PARA: ${document.getElementById('cliente').value.toUpperCase()}`, 20, 65);
+    doc.text(`FECHA: ${new Date().toLocaleDateString()}`, 150, 65);
+    doc.text(`ASESOR: EMANUEL`, 150, 72);
 
     doc.setDrawColor(59, 130, 246);
-    doc.setLineWidth(1);
-    doc.line(20, 65, 190, 65);
+    doc.setLineWidth(0.5);
+    doc.line(20, 75, 190, 75);
 
-    // Detalle Técnico
+    // Texto Persuasivo
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("DETALLE TÉCNICO:", 20, 80);
+    doc.text("DETALLES DEL PROYECTO:", 20, 90);
     
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(12);
-    doc.text(`• Fabricación de Portón ${window.detalle.tipo}`, 25, 90);
-    doc.text(`• Medidas: ${window.detalle.ancho}m x ${window.detalle.alto}m`, 25, 100);
-    doc.text(`• Material: Chapa del ${window.detalle.chapa}`, 25, 110);
-    
-    if(window.detalle.motor > 0) {
-      doc.text(`• Automatización: Motor ${window.detalle.modelo}`, 25, 120);
-    }
-    
-    doc.text(`• Instalación y mano de obra incluida.`, 25, 130);
+    doc.setFontSize(11);
+    let textoVenta = `Este sistema ha sido diseñado específicamente bajo medidas de ${window.detalle.ancho}m x ${window.detalle.alto}m utilizando materiales de alta durabilidad (Chapa ${window.detalle.chapa}) para garantizar la máxima seguridad de su propiedad y la fluidez en el acceso diario.`;
+    let lineas = doc.splitTextToSize(textoVenta, 170);
+    doc.text(lineas, 20, 100);
 
-    // Cuadro de Precio
-    doc.setDrawColor(200, 200, 200);
-    doc.setFillColor(248, 250, 252);
-    doc.rect(20, 150, 170, 30, 'FD');
-    
-    doc.setFontSize(18);
+    // Especificaciones
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(21, 128, 61); // Color verde
-    doc.text(`TOTAL FINAL: $${window.detalle.total.toLocaleString('es-AR')}`, 105, 170, {align: 'center'});
+    doc.text("• Estructura:", 25, 120);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Portón ${window.detalle.tipo} reforzado.`, 60, 120);
 
-    // Pie de página
+    if(window.detalle.motor > 0) {
+      doc.setFont("helvetica", "bold");
+      doc.text("• Automatización:", 25, 128);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Sistema con motor ${window.detalle.modelo} de alto tránsito.`, 65, 128);
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.text("• Instalación:", 25, 136);
+    doc.setFont("helvetica", "normal");
+    doc.text("Servicio llave en mano con puesta a punto profesional.", 60, 136);
+
+    // Beneficios
+    doc.setFillColor(241, 245, 249);
+    doc.rect(20, 145, 170, 25, 'F');
+    doc.setFont("helvetica", "bold");
+    doc.text("POR QUÉ ELEGIRNOS:", 25, 153);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text("- Calidad de materiales certificada.  - Especialistas en Córdoba.  - Garantía post-venta.", 25, 160);
+
+    // Cuadro de Inversión
+    doc.setDrawColor(34, 197, 94);
+    doc.setLineWidth(1);
+    doc.rect(20, 180, 170, 35);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(50, 50, 50);
+    doc.text("INVERSIÓN TOTAL DEL PROYECTO:", 105, 190, {align: 'center'});
+    
+    doc.setFontSize(24);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(21, 128, 61);
+    doc.text(`$${window.detalle.total.toLocaleString('es-AR')}`, 105, 205, {align: 'center'});
+
+    // Cierre
     doc.setTextColor(100, 100, 100);
     doc.setFontSize(10);
     doc.setFont("helvetica", "italic");
-    doc.text("Este presupuesto tiene una validez de 5 días corridos.", 105, 200, {align: 'center'});
-    doc.text("Gracias por confiar en nosotros.", 105, 205, {align: 'center'});
+    doc.text("Precios sujetos a variaciones según cotización del dólar.", 105, 230, {align: 'center'});
+    doc.setFont("helvetica", "bold");
+    doc.text("¡Comencemos hoy mismo a transformar tu ingreso!", 105, 240, {align: 'center'});
 
-    doc.save(`Presupuesto_${document.getElementById('cliente').value}.pdf`);
-  };
-
-  // Por si la imagen no carga
-  img.onerror = function() {
-    alert("No se pudo cargar el archivo icono.png. Asegurate de que esté en el repositorio.");
+    doc.save(`Propuesta_Comercial_${document.getElementById('cliente').value}.pdf`);
   };
 }
 </script>
