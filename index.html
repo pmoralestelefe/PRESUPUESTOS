@@ -153,21 +153,30 @@ function calcular(){
     m2: m2.toFixed(2), tipo: tipo, modelo: modelo, ancho: ancho, alto: alto, chapa: chapa
   };
 
-  // EMOJIS CORREGIDOS PARA MÁXIMA COMPATIBILIDAD
-  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || "cliente"}, ¡un gusto! 👋
+  // SISTEMA DE EMOJIS MEDIANTE CÓDIGOS HEXADECIMALES (NO FALLA)
+  const wave = "\uD83D\uDC4B";
+  const wrench = "\uD83D\uDD27";
+  const ruler = "\uD83D\uDCCF";
+  const gear = "\u2699\uFE0F";
+  const check = "\u2714\uFE0F";
+  const bolt = "\u26A1";
+  const money = "\uD83D\uDCB0";
+  const sparkles = "\u2728";
+
+  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || "cliente"}, ¡un gusto! ` + wave + `
 
 Soy *Emanuel* de *Portones Automáticos Córdoba*. Diseñé esta propuesta para tu hogar:
 
-🛠 *Proyecto:* Portón ${tipo.toUpperCase()}
-📏 *Medidas:* ${ancho}m x ${alto}m
-⚙ *Material:* Chapa del ${chapa}
-✔ *Incluye:* Fabricación, instalación y garantía.
+` + wrench + ` *Proyecto:* Portón ${tipo.toUpperCase()}
+` + ruler + ` *Medidas:* ${ancho}m x ${alto}m
+` + gear + ` *Material:* Chapa del ${chapa}
+` + check + ` *Incluye:* Fabricación, instalación y garantía.
 
-${motorActivo === "si" ? `⚡ *Automatización:* Motor ${modelo} de alto tránsito.` : "💡 Preparado para motorizar en el futuro."}
+${motorActivo === "si" ? bolt + ` *Automatización:* Motor ${modelo} de alto tránsito.` : "💡 Preparado para motorizar en el futuro."}
 
-💰 *INVERSIÓN TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}
+` + money + ` *INVERSIÓN TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}
 
-La comodidad de entrar a casa con un clic no tiene precio. ✨
+La comodidad de entrar a casa con un clic no tiene precio. ` + sparkles + `
 ¿Querés que coordinemos una visita para cerrar los detalles?`;
 
   const resDiv = document.getElementById('resultado');
