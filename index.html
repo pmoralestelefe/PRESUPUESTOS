@@ -2,99 +2,218 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Presupuestos PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portones Automáticos Córdoba - Presupuestos</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f172a">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body { font-family: Arial; margin:0; background:#0f172a; color:#fff; }
-header { padding:15px; text-align:center; background:#020617; font-size:20px; }
-.container { padding:15px; max-width:500px; margin:auto; }
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #f8fafc;
+    --accent: #3b82f6;
+    --green: #22c55e;
+  }
 
-input, select {
-  width:100%; padding:10px; margin:6px 0;
-  border-radius:8px; border:none;
-}
+  body { 
+    font-family: 'Segoe UI', Roboto, sans-serif; 
+    margin: 0; 
+    background: var(--bg); 
+    color: var(--text);
+    line-height: 1.6;
+  }
 
-button {
-  padding:12px; width:100%; margin-top:10px;
-  border:none; border-radius:8px; font-weight:bold;
-}
+  header { 
+    padding: 20px; 
+    text-align: center; 
+    background: #020617; 
+    font-size: 20px; 
+    font-weight: bold;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--accent);
+  }
 
-.btn-green { background:#22c55e; color:#000; }
-.btn-blue { background:#3b82f6; color:#fff; }
-.btn-gray { background:#475569; color:#fff; }
+  .container { 
+    padding: 20px; 
+    max-width: 800px; 
+    margin: auto; 
+  }
 
-.card { background:#1e293b; padding:10px; border-radius:8px; margin-top:10px; }
+  .grid-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  @media (min-width: 600px) {
+    .grid-form { grid-template-columns: 1fr 1fr; }
+    .full-width { grid-column: span 2; }
+  }
+
+  label { font-size: 13px; color: #94a3b8; display: block; margin-bottom: 5px; text-transform: uppercase; font-weight: 600; }
+
+  input, select {
+    width: 100%; 
+    padding: 12px; 
+    border-radius: 8px; 
+    border: 1px solid #334155;
+    background: #020617;
+    color: #fff;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+
+  input:focus { border-color: var(--accent); outline: none; }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  @media (min-width: 600px) {
+    .actions { flex-direction: row; }
+  }
+
+  button {
+    flex: 1;
+    padding: 15px; 
+    border: none; 
+    border-radius: 8px; 
+    font-weight: bold; 
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 15px;
+  }
+
+  button:active { transform: scale(0.98); }
+
+  .btn-green { background: var(--green); color: #052e16; }
+  .btn-blue { background: var(--accent); color: #fff; }
+  .btn-gray { background: #475569; color: #fff; }
+
+  .card { 
+    background: var(--card); 
+    padding: 20px; 
+    border-radius: 12px; 
+    margin-top: 20px; 
+    border: 1px solid #334155;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .res-item { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .total-row { 
+    border-top: 1px solid #334155; 
+    padding-top: 10px; 
+    font-size: 22px; 
+    font-weight: bold; 
+    color: var(--green);
+  }
 </style>
 </head>
 
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
-}
-</script>
-
 <body>
 
-<header>Presupuestos PRO</header>
+<header>Portones Automáticos Córdoba</header>
 
 <div class="container">
+  
+  <div class="grid-form">
+    <div class="full-width">
+      <label>Nombre del Cliente</label>
+      <input id="cliente" placeholder="Ej: Juan Pérez">
+    </div>
+    
+    <div>
+      <label>WhatsApp (ej: 3512345678)</label>
+      <input id="telefono" type="tel" placeholder="Sin el 0 ni el 15">
+    </div>
 
-<input id="cliente" placeholder="Cliente">
-<input id="telefono" placeholder="WhatsApp">
+    <div>
+      <label>Tipo de Portón</label>
+      <select id="tipo">
+        <option value="corredizo">Portón Corredizo</option>
+        <option value="levadizo">Portón Levadizo</option>
+      </select>
+    </div>
 
-<select id="tipo">
-<option value="corredizo">Portón Corredizo</option>
-<option value="levadizo">Portón Levadizo</option>
-</select>
+    <div>
+      <label>Ancho (metros)</label>
+      <input id="ancho" type="number" step="0.01" placeholder="3.00">
+    </div>
 
-<input id="ancho" placeholder="Ancho (m)">
-<input id="alto" placeholder="Alto (m)">
+    <div>
+      <label>Alto (metros)</label>
+      <input id="alto" type="number" step="0.01" placeholder="2.00">
+    </div>
 
-<select id="chapa">
-<option value="18">Chapa 18</option>
-<option value="20">Chapa 20</option>
-</select>
+    <div>
+      <label>Chapa</label>
+      <select id="chapa">
+        <option value="18">Chapa 18</option>
+        <option value="20">Chapa 20</option>
+      </select>
+    </div>
 
-<input id="dolar" placeholder="Valor dólar ($)">
+    <div>
+      <label>Valor Dólar ($)</label>
+      <input id="dolar" type="number" placeholder="Ej: 1150">
+    </div>
 
-<select id="motor">
-<option value="no">Sin motor</option>
-<option value="si">Con motor</option>
-</select>
+    <div>
+      <label>Motorización</label>
+      <select id="motor" onchange="toggleMotor()">
+        <option value="no">Sin motor</option>
+        <option value="si">Con motor</option>
+      </select>
+    </div>
 
-<input id="modelo_motor" placeholder="Modelo motor">
-<input id="precio_motor" placeholder="Precio motor">
+    <div id="div_modelo" style="display:none">
+      <label>Modelo de Motor</label>
+      <input id="modelo_motor" placeholder="Ej: PPA 1/4 HP">
+    </div>
 
-<input id="extras" placeholder="Extras ($)">
+    <div id="div_precio" style="display:none">
+      <label>Precio Motor ($)</label>
+      <input id="precio_motor" type="number" placeholder="Costo del motor">
+    </div>
 
-<button class="btn-green" onclick="calcular()">Calcular</button>
+    <div class="full-width">
+      <label>Extras / Otros ($)</label>
+      <input id="extras" type="number" placeholder="Pintura, herrajes, etc.">
+    </div>
+  </div>
 
-<div id="resultado" class="card"></div>
+  <button class="btn-green" onclick="calcular()">CALCULAR AHORA</button>
 
-<button class="btn-blue" onclick="enviarWhatsApp()">Enviar por WhatsApp</button>
-<button class="btn-gray" onclick="generarPDF()">Ver PDF PRO</button>
+  <div id="resultado" class="card" style="display:none"></div>
+
+  <div class="actions" style="margin-top:20px">
+    <button class="btn-blue" onclick="enviarWhatsApp()">Enviar WhatsApp</button>
+    <button class="btn-gray" onclick="generarPDF()">Generar PDF con Logo</button>
+  </div>
 
 </div>
 
 <script>
+function toggleMotor() {
+  const m = document.getElementById('motor').value;
+  document.getElementById('div_modelo').style.display = m === 'si' ? 'block' : 'none';
+  document.getElementById('div_precio').style.display = m === 'si' ? 'block' : 'none';
+}
 
-// PRECIO M2
 function getPrecioM2(tipo, chapa){
   if(tipo==="levadizo") return chapa==="18"?145.41:123.13;
   return chapa==="18"?157.24:110.06;
 }
 
-function num(id){
-  return parseFloat(document.getElementById(id).value)||0;
-}
+function num(id){ return parseFloat(document.getElementById(id).value)||0; }
 
-// 🔥 CALCULO CORRECTO
 function calcular(){
-
   let tipo = document.getElementById('tipo').value;
   let chapa = document.getElementById('chapa').value;
   let ancho = num('ancho');
@@ -102,7 +221,7 @@ function calcular(){
   let dolar = num('dolar');
 
   if(!ancho || !alto || !dolar){
-    alert("Faltan datos");
+    alert("Faltan datos obligatorios (Medidas o Dólar)");
     return;
   }
 
@@ -112,21 +231,9 @@ function calcular(){
 
   let motorActivo = document.getElementById('motor').value;
   let modelo = document.getElementById('modelo_motor').value;
-
-  let totalPorton = 0;
-
-  if(motorActivo === "no"){
-    totalPorton = base * 1.3;
-  } else {
-    totalPorton = base;
-  }
-
-  let totalMotor = 0;
-
-  if(motorActivo === "si"){
-    totalMotor = num('precio_motor') + 200000;
-  }
-
+  
+  let totalPorton = (motorActivo === "no") ? base * 1.3 : base;
+  let totalMotor = (motorActivo === "si") ? num('precio_motor') + 200000 : 0;
   let extras = num('extras');
 
   window.detalle = {
@@ -136,107 +243,121 @@ function calcular(){
     total: Math.round(totalPorton + totalMotor + extras),
     m2: m2.toFixed(2),
     tipo: tipo,
-    modelo: modelo
+    modelo: modelo,
+    ancho: ancho,
+    alto: alto,
+    chapa: chapa
   };
 
-  // MENSAJE WPP
-  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || ""}, ¿cómo estás?
+  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || ""}, ¡buen día!
+Soy Lisandro de *Portones Automáticos Córdoba*. Te paso el presupuesto:
 
-Te paso el presupuesto 👇
+🔧 *Trabajo:* ${tipo.toUpperCase()}
+📏 *Medidas:* ${ancho}m x ${alto}m (${window.detalle.m2} m²)
+🛠 *Material:* Chapa ${chapa}
+✔ Incluye instalación y puesta a punto.
 
-🔧 ${tipo}
-📏 Medidas: ${ancho}m x ${alto}m (${window.detalle.m2} m²)
+${motorActivo === "si" ? `⚙ *Automatización:* Motor ${modelo}` : ""}
 
-✔ Fabricación completa
-✔ Instalación incluida
+💰 *PRECIO TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}
 
-${motorActivo === "si" ? `⚙ Incluye motor ${modelo}` : ""}
+¿Te gustaría coordinar una visita para confirmar detalles?`;
 
-💰 TOTAL FINAL: $${window.detalle.total}
-
-Si te parece bien, coordinamos 👍`;
-
-  document.getElementById('resultado').innerHTML = `
-    Portón: $${window.detalle.porton}<br>
-    Motor: $${window.detalle.motor}<br>
-    Extras: $${window.detalle.extras}<br><br>
-    <b>TOTAL: $${window.detalle.total}</b>
+  const resDiv = document.getElementById('resultado');
+  resDiv.style.display = 'block';
+  resDiv.innerHTML = `
+    <div class="res-item"><span>Portón:</span> <span>$${window.detalle.porton.toLocaleString('es-AR')}</span></div>
+    <div class="res-item"><span>Motor:</span> <span>$${window.detalle.motor.toLocaleString('es-AR')}</span></div>
+    <div class="res-item"><span>Extras:</span> <span>$${window.detalle.extras.toLocaleString('es-AR')}</span></div>
+    <div class="res-item total-row"><span>TOTAL:</span> <span>$${window.detalle.total.toLocaleString('es-AR')}</span></div>
   `;
 }
 
-// WHATSAPP
 function enviarWhatsApp(){
-
   let numero = document.getElementById('telefono').value;
-
-  if(!window.mensajeWPP){
-    alert("Primero calculá");
-    return;
-  }
-
-  if(!numero){
-    alert("Falta número");
-    return;
-  }
-
+  if(!window.mensajeWPP) { alert("Calculá el presupuesto primero"); return; }
+  if(!numero) { alert("Ingresá un número de teléfono"); return; }
   let url = `https://wa.me/54${numero}?text=${encodeURIComponent(window.mensajeWPP)}`;
   window.open(url, '_blank');
 }
 
-// PDF PRO
+// NUEVA FUNCIÓN PDF CON LOGO
 function generarPDF(){
-
-  if(!window.detalle){
-    alert("Calculá primero");
-    return;
-  }
-
+  if(!window.detalle){ alert("Calculá primero"); return; }
+  
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
+  
+  // Cargamos la imagen icono.png
+  const img = new Image();
+  img.src = 'icono.png';
+  
+  img.onload = function(){
+    // Encabezado con color
+    doc.setFillColor(15, 23, 42);
+    doc.rect(0, 0, 210, 45, 'F');
+    
+    // Logo (esquina superior izquierda)
+    doc.addImage(img, 'PNG', 15, 7, 30, 30);
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.text("PORTONES AUTOMÁTICOS", 60, 22);
+    doc.setFontSize(14);
+    doc.text("CÓRDOBA", 60, 30);
 
-  let y = 20;
+    // Datos del cliente
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(12);
+    doc.text(`CLIENTE: ${document.getElementById('cliente').value.toUpperCase()}`, 20, 60);
+    doc.text(`FECHA: ${new Date().toLocaleDateString()}`, 150, 60);
 
-  doc.setFontSize(16);
-  doc.text("PRESUPUESTO", 80, y);
+    doc.setDrawColor(59, 130, 246);
+    doc.setLineWidth(1);
+    doc.line(20, 65, 190, 65);
 
-  y+=10;
+    // Detalle Técnico
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("DETALLE TÉCNICO:", 20, 80);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.text(`• Fabricación de Portón ${window.detalle.tipo}`, 25, 90);
+    doc.text(`• Medidas: ${window.detalle.ancho}m x ${window.detalle.alto}m`, 25, 100);
+    doc.text(`• Material: Chapa del ${window.detalle.chapa}`, 25, 110);
+    
+    if(window.detalle.motor > 0) {
+      doc.text(`• Automatización: Motor ${window.detalle.modelo}`, 25, 120);
+    }
+    
+    doc.text(`• Instalación y mano de obra incluida.`, 25, 130);
 
-  doc.setFontSize(11);
-  doc.text(`Cliente: ${document.getElementById('cliente').value}`, 10, y);
+    // Cuadro de Precio
+    doc.setDrawColor(200, 200, 200);
+    doc.setFillColor(248, 250, 252);
+    doc.rect(20, 150, 170, 30, 'FD');
+    
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(21, 128, 61); // Color verde
+    doc.text(`TOTAL FINAL: $${window.detalle.total.toLocaleString('es-AR')}`, 105, 170, {align: 'center'});
 
-  y+=15;
+    // Pie de página
+    doc.setTextColor(100, 100, 100);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    doc.text("Este presupuesto tiene una validez de 5 días corridos.", 105, 200, {align: 'center'});
+    doc.text("Gracias por confiar en nosotros.", 105, 205, {align: 'center'});
 
-  // PORTON
-  doc.rect(10, y, 190, 35);
-  doc.text("PORTÓN", 15, y+8);
-  doc.text(`$${window.detalle.porton}`, 15, y+20);
+    doc.save(`Presupuesto_${document.getElementById('cliente').value}.pdf`);
+  };
 
-  y+=45;
-
-  // MOTOR
-  if(window.detalle.motor>0){
-    doc.rect(10, y, 190, 30);
-    doc.text("AUTOMATIZACIÓN", 15, y+8);
-    doc.text(`$${window.detalle.motor}`, 15, y+20);
-    y+=40;
-  }
-
-  // EXTRAS
-  if(window.detalle.extras>0){
-    doc.rect(10, y, 190, 25);
-    doc.text("EXTRAS", 15, y+10);
-    doc.text(`$${window.detalle.extras}`, 120, y+10);
-    y+=35;
-  }
-
-  // TOTAL
-  doc.rect(10, y, 190, 30);
-  doc.setFontSize(14);
-  doc.text(`TOTAL FINAL: $${window.detalle.total}`, 15, y+18);
-
-  doc.output('dataurlnewwindow');
+  // Por si la imagen no carga
+  img.onerror = function() {
+    alert("No se pudo cargar el archivo icono.png. Asegurate de que esté en el repositorio.");
+  };
 }
-
 </script>
 
 </body>
