@@ -26,7 +26,6 @@
     line-height: 1.6;
   }
 
-  /* HEADER CON LOGO A LA IZQUIERDA */
   header { 
     display: flex;
     align-items: center;
@@ -38,7 +37,7 @@
   }
 
   header img {
-    height: 40px; /* Tamaño del logo en el titulo */
+    height: 40px;
     width: auto;
     border-radius: 4px;
   }
@@ -47,14 +46,9 @@
     font-size: 18px;
     margin: 0;
     font-weight: bold;
-    letter-spacing: 0.5px;
   }
 
-  .container { 
-    padding: 20px; 
-    max-width: 800px; 
-    margin: auto; 
-  }
+  .container { padding: 20px; max-width: 800px; margin: auto; }
 
   .grid-form {
     display: grid;
@@ -71,62 +65,23 @@
   label { font-size: 12px; color: #94a3b8; display: block; margin-bottom: 5px; text-transform: uppercase; font-weight: 600; }
 
   input, select {
-    width: 100%; 
-    padding: 12px; 
-    border-radius: 8px; 
-    border: 1px solid #334155;
-    background: #020617;
-    color: #fff;
-    box-sizing: border-box;
-    font-size: 16px;
+    width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155;
+    background: #020617; color: #fff; box-sizing: border-box; font-size: 16px;
   }
 
-  input:focus { border-color: var(--accent); outline: none; }
+  .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
 
-  .actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-  }
+  @media (min-width: 600px) { .actions { flex-direction: row; } }
 
-  @media (min-width: 600px) {
-    .actions { flex-direction: row; }
-  }
-
-  button {
-    flex: 1;
-    padding: 15px; 
-    border: none; 
-    border-radius: 8px; 
-    font-weight: bold; 
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 15px;
-  }
-
-  button:active { transform: scale(0.98); }
+  button { flex: 1; padding: 15px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 15px; }
 
   .btn-green { background: var(--green); color: #052e16; }
   .btn-blue { background: var(--accent); color: #fff; }
   .btn-gray { background: #475569; color: #fff; }
 
-  .card { 
-    background: var(--card); 
-    padding: 20px; 
-    border-radius: 12px; 
-    margin-top: 20px; 
-    border: 1px solid #334155;
-  }
-
+  .card { background: var(--card); padding: 20px; border-radius: 12px; margin-top: 20px; border: 1px solid #334155; }
   .res-item { display: flex; justify-content: space-between; margin-bottom: 8px; }
-  .total-row { 
-    border-top: 1px solid #334155; 
-    padding-top: 10px; 
-    font-size: 22px; 
-    font-weight: bold; 
-    color: var(--green);
-  }
+  .total-row { border-top: 1px solid #334155; padding-top: 10px; font-size: 22px; font-weight: bold; color: var(--green); }
 </style>
 </head>
 
@@ -138,82 +93,26 @@
 </header>
 
 <div class="container">
-  
   <div class="grid-form">
-    <div class="full-width">
-      <label>Nombre del Cliente</label>
-      <input id="cliente" placeholder="Ej: Juan Pérez">
-    </div>
-    
-    <div>
-      <label>WhatsApp</label>
-      <input id="telefono" type="tel" placeholder="351xxxxxxx">
-    </div>
-
-    <div>
-      <label>Tipo de Portón</label>
-      <select id="tipo">
-        <option value="corredizo">Portón Corredizo</option>
-        <option value="levadizo">Portón Levadizo</option>
-      </select>
-    </div>
-
-    <div>
-      <label>Ancho (m)</label>
-      <input id="ancho" type="number" step="0.01" placeholder="3.00">
-    </div>
-
-    <div>
-      <label>Alto (m)</label>
-      <input id="alto" type="number" step="0.01" placeholder="2.00">
-    </div>
-
-    <div>
-      <label>Chapa</label>
-      <select id="chapa">
-        <option value="18">Chapa 18</option>
-        <option value="20">Chapa 20</option>
-      </select>
-    </div>
-
-    <div>
-      <label>Valor Dólar ($)</label>
-      <input id="dolar" type="number" placeholder="Ej: 1150">
-    </div>
-
-    <div>
-      <label>Motorización</label>
-      <select id="motor" onchange="toggleMotor()">
-        <option value="no">Sin motor</option>
-        <option value="si">Con motor</option>
-      </select>
-    </div>
-
-    <div id="div_modelo" style="display:none">
-      <label>Modelo de Motor</label>
-      <input id="modelo_motor" placeholder="Ej: PPA 1/4 HP">
-    </div>
-
-    <div id="div_precio" style="display:none">
-      <label>Precio Motor ($)</label>
-      <input id="precio_motor" type="number" placeholder="Costo motor">
-    </div>
-
-    <div class="full-width">
-      <label>Extras / Otros ($)</label>
-      <input id="extras" type="number" placeholder="Pintura, herrajes, etc.">
-    </div>
+    <div class="full-width"><label>Nombre del Cliente</label><input id="cliente" placeholder="Ej: Juan Pérez"></div>
+    <div><label>WhatsApp</label><input id="telefono" type="tel" placeholder="351xxxxxxx"></div>
+    <div><label>Tipo de Portón</label><select id="tipo"><option value="corredizo">Portón Corredizo</option><option value="levadizo">Portón Levadizo</option></select></div>
+    <div><label>Ancho (m)</label><input id="ancho" type="number" step="0.01" placeholder="3.00"></div>
+    <div><label>Alto (m)</label><input id="alto" type="number" step="0.01" placeholder="2.00"></div>
+    <div><label>Chapa</label><select id="chapa"><option value="18">Chapa 18</option><option value="20">Chapa 20</option></select></div>
+    <div><label>Dólar ($)</label><input id="dolar" type="number" placeholder="Ej: 1150"></div>
+    <div><label>Motor</label><select id="motor" onchange="toggleMotor()"><option value="no">Sin motor</option><option value="si">Con motor</option></select></div>
+    <div id="div_modelo" style="display:none"><label>Modelo Motor</label><input id="modelo_motor" placeholder="Ej: PPA 1/4 HP"></div>
+    <div id="div_precio" style="display:none"><label>Precio Motor ($)</label><input id="precio_motor" type="number"></div>
+    <div class="full-width"><label>Extras ($)</label><input id="extras" type="number"></div>
   </div>
 
   <button class="btn-green" onclick="calcular()">CALCULAR PRESUPUESTO</button>
-
   <div id="resultado" class="card" style="display:none"></div>
-
   <div class="actions">
     <button class="btn-blue" onclick="enviarWhatsApp()">Enviar WhatsApp</button>
     <button class="btn-gray" onclick="generarPDF()">Generar Propuesta PDF</button>
   </div>
-
 </div>
 
 <script>
@@ -237,70 +136,54 @@ function calcular(){
   let alto = num('alto');
   let dolar = num('dolar');
 
-  if(!ancho || !alto || !dolar){
-    alert("Faltan datos obligatorios");
-    return;
-  }
+  if(!ancho || !alto || !dolar){ alert("Faltan datos"); return; }
 
   let m2 = ancho * alto;
   let usd = getPrecioM2(tipo,chapa);
   let base = m2 * usd * dolar;
-
   let motorActivo = document.getElementById('motor').value;
   let modelo = document.getElementById('modelo_motor').value;
-  
   let totalPorton = (motorActivo === "no") ? base * 1.3 : base;
   let totalMotor = (motorActivo === "si") ? num('precio_motor') + 200000 : 0;
   let extras = num('extras');
 
   window.detalle = {
-    porton: Math.round(totalPorton),
-    motor: Math.round(totalMotor),
-    extras: Math.round(extras),
-    total: Math.round(totalPorton + totalMotor + extras),
-    m2: m2.toFixed(2),
-    tipo: tipo,
-    modelo: modelo,
-    ancho: ancho,
-    alto: alto,
-    chapa: chapa
+    porton: Math.round(totalPorton), motor: Math.round(totalMotor),
+    extras: Math.round(extras), total: Math.round(totalPorton + totalMotor + extras),
+    m2: m2.toFixed(2), tipo: tipo, modelo: modelo, ancho: ancho, alto: alto, chapa: chapa
   };
 
-  // 🛠 SOLUCIÓN EMOJIS: Usando códigos Unicode para evitar errores de rombos
-  const wave = "\uD83D\uDC4B";
-  const wrench = "\uD83D\uDD27";
-  const ruler = "\uD83D\uDCCF";
-  const hammer = "\uD83D\uDEE0";
-  const check = "\u2714";
-  const bolt = "\u26A1";
-  const money = "\uD83D\uDCB0";
-  const spark = "\u2728";
+  // 🛠 SISTEMA ANTIFALLO DE EMOJIS
+  const e = {
+    wave: String.fromCodePoint(0x1F44B),
+    wrench: String.fromCodePoint(0x1F527),
+    ruler: String.fromCodePoint(0x1F4CF),
+    hammer: String.fromCodePoint(0x1F6E0),
+    check: String.fromCodePoint(0x2714),
+    bolt: String.fromCodePoint(0x26A1),
+    money: String.fromCodePoint(0x1F4B0),
+    spark: String.fromCodePoint(0x2728)
+  };
 
-  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || "cliente"}, ¡un gusto saludarte! ${wave}
+  window.mensajeWPP = `Hola ${document.getElementById('cliente').value || "cliente"}, ¡un gusto! ${e.wave}
 
-Soy *Emanuel* de *Portones Automáticos Córdoba*. Diseñé esta propuesta para mejorar la seguridad y confort de tu hogar:
+Soy *Emanuel* de *Portones Automáticos Córdoba*. Diseñé esta propuesta para tu hogar:
 
-${wrench} *Proyecto:* Fabricación de Portón ${tipo.toUpperCase()}
-${ruler} *Medidas:* ${ancho}m x ${alto}m
-${hammer} *Material:* Chapa reforzada del ${chapa}
-${check} *Incluye:* Entrega, instalación profesional y garantía.
+${e.wrench} *Proyecto:* Portón ${tipo.toUpperCase()}
+${e.ruler} *Medidas:* ${ancho}m x ${alto}m
+${e.hammer} *Material:* Chapa del ${chapa}
+${e.check} *Incluye:* Fabricación, instalación y garantía.
 
-${motorActivo === "si" ? `${bolt} *Confort Total:* Incluye motor ${modelo} de alto tránsito.` : "💡 *Nota:* Preparado para automatizar en el futuro."}
+${motorActivo === "si" ? `${e.bolt} *Automatización:* Motor ${modelo} de alto tránsito.` : "💡 Preparado para motorizar en el futuro."}
 
-${money} *INVERSIÓN TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}
+${e.money} *INVERSIÓN TOTAL:* $${window.detalle.total.toLocaleString('es-AR')}
 
-Lo mejor de este sistema es la tranquilidad de entrar a casa con un solo clic. ${spark}
-
-¿Te gustaría que coordinemos una visita para cerrar los detalles?`;
+La comodidad de entrar a casa con un clic no tiene precio. ${e.spark}
+¿Querés que coordinemos una visita para cerrar los detalles?`;
 
   const resDiv = document.getElementById('resultado');
   resDiv.style.display = 'block';
-  resDiv.innerHTML = `
-    <div class="res-item"><span>Estructura:</span> <span>$${window.detalle.porton.toLocaleString('es-AR')}</span></div>
-    <div class="res-item"><span>Motorización:</span> <span>$${window.detalle.motor.toLocaleString('es-AR')}</span></div>
-    <div class="res-item"><span>Adicionales:</span> <span>$${window.detalle.extras.toLocaleString('es-AR')}</span></div>
-    <div class="res-item total-row"><span>INVERSIÓN FINAL:</span> <span>$${window.detalle.total.toLocaleString('es-AR')}</span></div>
-  `;
+  resDiv.innerHTML = `<div class="res-item"><span>Estructura:</span> <span>$${window.detalle.porton.toLocaleString('es-AR')}</span></div><div class="res-item"><span>Motor:</span> <span>$${window.detalle.motor.toLocaleString('es-AR')}</span></div><div class="res-item"><span>Extras:</span> <span>$${window.detalle.extras.toLocaleString('es-AR')}</span></div><div class="res-item total-row"><span>INVERSIÓN FINAL:</span> <span>$${window.detalle.total.toLocaleString('es-AR')}</span></div>`;
 }
 
 function enviarWhatsApp(){
@@ -319,60 +202,44 @@ function generarPDF(){
   img.src = 'icono.png';
   
   img.onload = function(){
-    doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, 210, 50, 'F');
+    doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 50, 'F');
     doc.addImage(img, 'PNG', 15, 10, 30, 30);
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
-    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 255, 255); doc.setFontSize(22); doc.setFont("helvetica", "bold");
     doc.text("PROPUESTA DE VALOR", 55, 25);
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12); doc.setFont("helvetica", "normal");
     doc.text("Seguridad y Confort para tu Hogar", 55, 33);
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(11);
+    
+    doc.setTextColor(0, 0, 0); doc.setFontSize(11);
     doc.text(`PARA: ${document.getElementById('cliente').value.toUpperCase()}`, 20, 65);
     doc.text(`FECHA: ${new Date().toLocaleDateString()}`, 150, 65);
     doc.text(`ASESOR: EMANUEL`, 150, 72);
-    doc.setDrawColor(59, 130, 246);
-    doc.line(20, 75, 190, 75);
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.text("DETALLES DEL PROYECTO:", 20, 90);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    let textoVenta = `Este sistema ha sido diseñado bajo medidas de ${window.detalle.ancho}m x ${window.detalle.alto}m utilizando materiales de alta durabilidad (Chapa ${window.detalle.chapa}) para garantizar la máxima seguridad y fluidez en el acceso.`;
-    let lineas = doc.splitTextToSize(textoVenta, 170);
-    doc.text(lineas, 20, 100);
-    doc.setFont("helvetica", "bold");
-    doc.text("• Estructura:", 25, 120);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Portón ${window.detalle.tipo} reforzado.`, 60, 120);
-    if(window.detalle.motor > 0) {
-      doc.setFont("helvetica", "bold");
-      doc.text("• Automatización:", 25, 128);
-      doc.setFont("helvetica", "normal");
-      doc.text(`Sistema con motor ${window.detalle.modelo}.`, 65, 128);
-    }
-    doc.setFont("helvetica", "bold");
-    doc.text("• Instalación:", 25, 136);
-    doc.setFont("helvetica", "normal");
-    doc.text("Servicio llave en mano con puesta a punto.", 60, 136);
-    doc.setDrawColor(34, 197, 94);
-    doc.rect(20, 160, 170, 35);
-    doc.setFontSize(11);
+    doc.setDrawColor(59, 130, 246); doc.line(20, 75, 190, 75);
+
+    doc.setFontSize(14); doc.setFont("helvetica", "bold");
+    doc.text("DETALLES TÉCNICOS:", 20, 90);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(11);
+    let textoVenta = `Sistema diseñado bajo medidas de ${window.detalle.ancho}m x ${window.detalle.alto}m utilizando materiales de alta durabilidad (Chapa ${window.detalle.chapa}) para garantizar seguridad y confort.`;
+    doc.text(doc.splitTextToSize(textoVenta, 170), 20, 100);
+
+    // REINTEGRADA SECCIÓN POR QUÉ ELEGIRNOS
+    doc.setFillColor(241, 245, 249); doc.rect(20, 115, 170, 30, 'F');
+    doc.setFont("helvetica", "bold"); doc.text("POR QUÉ ELEGIRNOS:", 25, 125);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+    doc.text("• Especialistas en Córdoba: Acompañamos cada etapa del proyecto.", 25, 132);
+    doc.text("• Materiales Certificados: Chapa de espesor real y motores de alta gama.", 25, 138);
+    doc.text("• Garantía y Post-Venta: Estamos presentes ante cualquier necesidad técnica.", 25, 144);
+
+    doc.setDrawColor(34, 197, 94); doc.rect(20, 160, 170, 35);
+    doc.setFontSize(11); doc.setFont("helvetica", "bold");
     doc.text("INVERSIÓN TOTAL DEL PROYECTO:", 105, 170, {align: 'center'});
-    doc.setFontSize(24);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(21, 128, 61);
+    doc.setFontSize(24); doc.setTextColor(21, 128, 61);
     doc.text(`$${window.detalle.total.toLocaleString('es-AR')}`, 105, 185, {align: 'center'});
-    doc.setTextColor(100, 100, 100);
-    doc.setFontSize(10);
+    
+    doc.setTextColor(100, 100, 100); doc.setFontSize(10); doc.setFont("helvetica", "italic");
     doc.text("¡Comencemos hoy mismo a transformar tu ingreso!", 105, 230, {align: 'center'});
     doc.save(`Propuesta_${document.getElementById('cliente').value}.pdf`);
   };
 }
 </script>
-
 </body>
 </html>
