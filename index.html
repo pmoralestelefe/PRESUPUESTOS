@@ -87,10 +87,11 @@
       <div id="div_modelo" style="display:none"><label>Modelo Motor</label><input id="modelo_motor" placeholder="Ej: PPA Jet Flex"></div>
       
       <div class="full card" style="background:#111827">
-        <label style="color:var(--accent)">Adicionales Estéticos</label>
+        <label style="color:var(--accent)">Adicionales y Estética</label>
         <div class="grid-form" style="margin-top:10px">
-            <div><label>Puerta Conjugada / Escape ($)</label><input id="puerta_conjugada" type="number" placeholder="0"></div>
-            <div><label>Otros Extras ($)</label><input id="extras" type="number" placeholder="0"></div>
+            <div><label>Puerta Conjugada ($)</label><input id="puerta_conjugada" type="number" placeholder="0"></div>
+            <div><label>¿Lleva Lucera?</label><select id="lucera"><option value="no">No</option><option value="si">Sí (Iluminación natural)</option></select></div>
+            <div class="full"><label>Otros Extras ($)</label><input id="extras" type="number" placeholder="0"></div>
         </div>
       </div>
     </div>
@@ -112,9 +113,7 @@
 
 <script>
 const preciosEstandar = {
-    corredizo: [
-        { desc: "3.00 x 2.00 Estándar", usd: 619.31, ancho: 3, alto: 2 }
-    ],
+    corredizo: [ { desc: "3.00 x 2.00 Estándar", usd: 619.31, ancho: 3, alto: 2 } ],
     levadizo: [
         { desc: "2.40 x 2.05 sin puerta", usd: 693.51, ancho: 2.40, alto: 2.05 },
         { desc: "2.40 x 2.05 con puerta", usd: 823.27, ancho: 2.40, alto: 2.05 },
@@ -155,6 +154,7 @@ function calcular() {
     const modo = document.getElementById('modo_medida').value;
     const motorModo = document.getElementById('motor').value;
     const dolar = num('dolar');
+    const lucera = document.getElementById('lucera').value;
     
     let ancho, alto, usdBase;
 
@@ -192,18 +192,18 @@ function calcular() {
 
     window.detalle = {
         cliente, tel: document.getElementById('telefono').value,
-        tipo, ancho, alto, total: Math.round(total), subtexto,
+        tipo, ancho, alto, total: Math.round(total), subtexto, lucera,
         fecha: new Date().toLocaleDateString(), modelo: document.getElementById('modelo_motor').value
     };
 
-    // Mensaje de WhatsApp con Psicología de Ventas
     window.mensajeWPP = `Hola ${cliente}, ¡un gusto! 👋\n\n` +
     `Soy *Emanuel* de *Portones Automáticos Córdoba*. Esta es la propuesta integral para tu hogar:\n\n` +
     `🏠 *Proyecto:* ${subtexto} (${tipo.toUpperCase()})\n` +
     `📏 *Medidas:* ${ancho}m x ${alto}m\n` +
     (window.detalle.modelo ? `⚡ *Motor:* ${window.detalle.modelo}\n` : "") +
-    (num('puerta_conjugada') > 0 ? `🚪 *Adicional:* Puerta conjugada estética\n` : "") +
-    `✅ *Incluye:* Materiales premium, instalación técnica y garantía.\n\n` +
+    (lucera === 'si' ? `✨ *Detalle:* Incorporación de lucera para iluminación natural\n` : "") +
+    (num('puerta_conjugada') > 0 ? `🚪 *Adicional:* Incluye puerta conjugada de estética unificada\n` : "") +
+    `✅ *Incluye:* Materiales de primera, instalación técnica y garantía certificada.\n\n` +
     `💰 *VALOR TOTAL:* $${Math.round(total).toLocaleString('es-AR')}\n\n` +
     `*¿Te gustaría que agendemos una visita técnica para comenzar?* 🚀`;
 
@@ -229,6 +229,7 @@ function generarPDF() {
     doc.text(`CLIENTE: ${window.detalle.cliente}`, 20, 60);
     doc.text(`DETALLE: ${window.detalle.subtexto}`, 20, 70);
     doc.text(`MEDIDAS: ${window.detalle.ancho} x ${window.detalle.alto}`, 20, 80);
+    if(window.detalle.lucera === 'si') doc.text(`ADICIONAL: Incorporación de Lucera`, 20, 90);
     doc.setFontSize(16); doc.setTextColor(21, 128, 61);
     doc.text(`INVERSIÓN FINAL: $${window.detalle.total.toLocaleString('es-AR')}`, 20, 110);
     doc.save(`Propuesta_${window.detalle.cliente}.pdf`);
