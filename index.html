@@ -20,7 +20,6 @@
   @media (min-width: 600px) { .grid-form { grid-template-columns: 1fr 1fr; } .full { grid-column: span 2; } }
   label { font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; display: block; }
   input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #020617; color: #fff; box-sizing: border-box; outline: none; }
-  input:focus { border-color: var(--accent); }
   button.main { width: 100%; padding: 16px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
   .btn-green { background: var(--green); color: #052e16; }
   .btn-blue { background: var(--accent); color: #fff; }
@@ -179,6 +178,8 @@ function calcular() {
     }
 
     let total = 0;
+    let descServicio = motorModo === 'solo_inst' ? "Automatización Profesional" : "Fabricación e Instalación";
+    
     if (motorModo === 'solo_inst') {
         total = (tipo === 'corredizo') ? ((document.getElementById('peso_porton').value === 'pesado' ? 200000 + num('precio_motor') : 400000) + (ancho > 3 ? (ancho - 3) * 30000 : 0)) : (ancho > 2.60 ? 200000 + num('precio_motor') : 400000);
     } else {
@@ -194,7 +195,7 @@ function calcular() {
 
     window.detalle = {
         cliente, tel: document.getElementById('telefono').value,
-        tipo, ancho, alto, total, lucera, textoAcceso,
+        tipo, ancho, alto, total, lucera, textoAcceso, descServicio,
         fecha: new Date().toLocaleDateString(), modelo: document.getElementById('modelo_motor').value,
         id: Date.now()
     };
@@ -206,7 +207,17 @@ function calcular() {
     document.getElementById('resultado').style.display = 'block';
     document.getElementById('res_total').innerText = `TOTAL: $${total.toLocaleString('es-AR')}`;
     
-    window.mensajeWPP = `Hola ${cliente}! Emanuel de PAC te saluda. Propuesta: ${tipo.toUpperCase()} ${ancho}x${alto}. Total: $${total.toLocaleString('es-AR')}. ¿Coordinamos visita?`;
+    // MENSAJE DE WHATSAPP RESTAURADO
+    window.mensajeWPP = `Hola *${cliente}*, ¡un gusto saludarte! 👋\n\n` +
+    `Soy *Emanuel* de *Portones Automáticos Córdoba*. Esta es la propuesta integral para tu hogar:\n\n` +
+    `🏠 *Servicio:* ${descServicio} (${tipo.toUpperCase()})\n` +
+    `📏 *Medidas:* ${ancho}m x ${alto}m\n` +
+    (window.detalle.modelo ? `⚡ *Tecnología:* Motor ${window.detalle.modelo}\n` : "") +
+    (lucera === 'si' ? `✨ *Detalle:* Lucera para iluminación natural\n` : "") +
+    (textoAcceso ? `🚪 *Acceso:* ${textoAcceso}\n` : "") +
+    `✅ *Incluye:* Materiales premium, instalación técnica y garantía certificada.\n\n` +
+    `💰 *INVERSIÓN TOTAL:* $${total.toLocaleString('es-AR')}\n\n` +
+    `*¿Te gustaría que agendemos una visita técnica para comenzar?* 🚀`;
 }
 
 function switchTab(tab) {
@@ -246,20 +257,14 @@ function generarPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const d = window.detalle;
-
-    // Header Diseño PAC
     doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 50, 'F');
     doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.setFont("helvetica", "bold");
     doc.text("PAC - APERTURAS", 20, 30);
     doc.setFontSize(10); doc.text("SISTEMAS AUTOMATIZADOS E INGENIERÍA EN HIERRO", 20, 38);
-
-    // Cliente y Fecha
     doc.setTextColor(51, 65, 85); doc.setFontSize(12);
     doc.text(`ATENCIÓN: ${d.cliente.toUpperCase()}`, 20, 65);
     doc.text(`FECHA: ${d.fecha}`, 150, 65);
     doc.setDrawColor(59, 130, 246); doc.setLineWidth(1); doc.line(20, 70, 190, 70);
-
-    // Especificaciones
     doc.setFontSize(14); doc.text("PROPUESTA TÉCNICA", 20, 85);
     doc.setFontSize(11); doc.setFont("helvetica", "normal");
     const specs = [
@@ -269,11 +274,8 @@ function generarPDF() {
         d.textoAcceso ? `• Acceso: ${d.textoAcceso}` : null,
         d.lucera === 'si' ? "• Extra: Lucera para iluminación natural" : null
     ].filter(x => x);
-    
     let y = 95;
     specs.forEach(s => { doc.text(s, 25, y); y += 8; });
-
-    // Bloque de Valor / Diferencial
     doc.setFillColor(241, 245, 249); doc.rect(20, y + 5, 170, 45, 'F');
     doc.setTextColor(30, 41, 59); doc.setFont("helvetica", "bold");
     doc.text("VALOR AGREGADO PAC:", 25, y + 15);
@@ -281,16 +283,9 @@ function generarPDF() {
     doc.text("- Pintura base anticorrosiva y acabados de precisión.", 25, y + 22);
     doc.text("- Soldadura técnica para máxima durabilidad estructural.", 25, y + 28);
     doc.text("- Instalación certificada con garantía de 12 meses.", 25, y + 34);
-
-    // Inversión
     doc.setFillColor(34, 197, 94); doc.rect(20, 200, 170, 35, 'F');
     doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text("INVERSIÓN FINAL LLAVE EN MANO", 105, 210, {align: 'center'});
     doc.setFontSize(26); doc.text(`$${d.total.toLocaleString('es-AR')}`, 105, 225, {align: 'center'});
-
-    // Footer
-    doc.setTextColor(148, 163, 184); doc.setFontSize(9);
-    doc.text("Esta propuesta tiene una validez de 5 días debido a la volatilidad de insumos.", 105, 280, {align: 'center'});
-
     doc.save(`Propuesta_PAC_${d.cliente}.pdf`);
 }
 
@@ -303,7 +298,6 @@ function exportarReporteMensual() {
     datos.forEach(p => {
         doc.setFontSize(10); doc.text(`${p.fecha} - ${p.cliente.substring(0,15)}... - ${p.tipo}: $${p.total.toLocaleString('es-AR')}`, 20, y);
         total += p.total; y += 8;
-        if(y > 270) { doc.addPage(); y = 20; }
     });
     doc.setFontSize(14); doc.setFont("helvetica", "bold");
     doc.text(`TOTAL PRESUPUESTADO: $${total.toLocaleString('es-AR')}`, 20, y + 10);
