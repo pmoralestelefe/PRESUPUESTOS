@@ -27,7 +27,6 @@
   .btn-blue { background: var(--accent); color: #fff; }
   .btn-gray { background: #475569; color: #fff; }
   .card { background: var(--card); padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid #334155; }
-  .historial-item { background: var(--card); padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid var(--accent); }
 </style>
 </head>
 
@@ -89,7 +88,13 @@
       <div class="full card" style="background:#111827">
         <label style="color:var(--accent)">Adicionales y Estética</label>
         <div class="grid-form" style="margin-top:10px">
-            <div><label>Puerta Conjugada ($)</label><input id="puerta_conjugada" type="number" placeholder="0"></div>
+            <div><label>Puerta Conjugada</label>
+              <select id="tipo_puerta">
+                <option value="0">Sin puerta</option>
+                <option value="329.68">Simple Revestimiento (329.68 USD)</option>
+                <option value="395.39">Doble Revestimiento (395.39 USD)</option>
+              </select>
+            </div>
             <div><label>¿Lleva Lucera?</label><select id="lucera"><option value="no">No</option><option value="si">Sí (Iluminación natural)</option></select></div>
             <div class="full"><label>Otros Extras ($)</label><input id="extras" type="number" placeholder="0"></div>
         </div>
@@ -155,6 +160,7 @@ function calcular() {
     const motorModo = document.getElementById('motor').value;
     const dolar = num('dolar');
     const lucera = document.getElementById('lucera').value;
+    const usdPuerta = parseFloat(document.getElementById('tipo_puerta').value);
     
     let ancho, alto, usdBase;
 
@@ -188,11 +194,17 @@ function calcular() {
         subtexto = "Fabricación + Instalación";
     }
 
-    total += num('puerta_conjugada') + num('extras');
+    // Sumar puerta conjugada en pesos
+    let costoPuertaPesos = usdPuerta * dolar;
+    total += costoPuertaPesos + num('extras');
+
+    let textoPuerta = "";
+    if(usdPuerta === 329.68) textoPuerta = "Puerta conjugada (Simple Revestimiento)";
+    if(usdPuerta === 395.39) textoPuerta = "Puerta conjugada (Doble Revestimiento)";
 
     window.detalle = {
         cliente, tel: document.getElementById('telefono').value,
-        tipo, ancho, alto, total: Math.round(total), subtexto, lucera,
+        tipo, ancho, alto, total: Math.round(total), subtexto, lucera, textoPuerta,
         fecha: new Date().toLocaleDateString(), modelo: document.getElementById('modelo_motor').value
     };
 
@@ -202,7 +214,7 @@ function calcular() {
     `📏 *Medidas:* ${ancho}m x ${alto}m\n` +
     (window.detalle.modelo ? `⚡ *Motor:* ${window.detalle.modelo}\n` : "") +
     (lucera === 'si' ? `✨ *Detalle:* Incorporación de lucera para iluminación natural\n` : "") +
-    (num('puerta_conjugada') > 0 ? `🚪 *Adicional:* Incluye puerta conjugada de estética unificada\n` : "") +
+    (textoPuerta ? `🚪 *Adicional:* Incluye ${textoPuerta}\n` : "") +
     `✅ *Incluye:* Materiales de primera, instalación técnica y garantía certificada.\n\n` +
     `💰 *VALOR TOTAL:* $${Math.round(total).toLocaleString('es-AR')}\n\n` +
     `*¿Te gustaría que agendemos una visita técnica para comenzar?* 🚀`;
@@ -230,8 +242,9 @@ function generarPDF() {
     doc.text(`DETALLE: ${window.detalle.subtexto}`, 20, 70);
     doc.text(`MEDIDAS: ${window.detalle.ancho} x ${window.detalle.alto}`, 20, 80);
     if(window.detalle.lucera === 'si') doc.text(`ADICIONAL: Incorporación de Lucera`, 20, 90);
+    if(window.detalle.textoPuerta) doc.text(`ADICIONAL: ${window.detalle.textoPuerta}`, 20, 100);
     doc.setFontSize(16); doc.setTextColor(21, 128, 61);
-    doc.text(`INVERSIÓN FINAL: $${window.detalle.total.toLocaleString('es-AR')}`, 20, 110);
+    doc.text(`INVERSIÓN FINAL: $${window.detalle.total.toLocaleString('es-AR')}`, 20, 120);
     doc.save(`Propuesta_${window.detalle.cliente}.pdf`);
 }
 
