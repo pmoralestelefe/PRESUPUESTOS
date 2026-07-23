@@ -256,48 +256,78 @@ function borrarTodo() { if(confirm("¿Borrar historial?")) { localStorage.remove
 function enviarWhatsApp() { window.open(`https://wa.me/54${window.detalle.tel}?text=${encodeURIComponent(window.mensajeWPP)}`, '_blank'); }
 
 function generarPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
     const d = window.detalle;
-    doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 50, 'F');
-    doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.setFont("helvetica", "bold");
-    doc.text("Portones Automáticos Córdoba", 20, 30);
-    doc.setFontSize(10); doc.text("SISTEMAS AUTOMATIZADOS E INGENIERÍA EN HIERRO", 20, 38);
-    doc.setTextColor(51, 65, 85); doc.setFontSize(12);
-    doc.text(`ATENCIÓN: ${d.cliente.toUpperCase()}`, 20, 65);
-    doc.text(`FECHA: ${d.fecha}`, 150, 65);
-    doc.setDrawColor(59, 130, 246); doc.setLineWidth(1); doc.line(20, 70, 190, 70);
-    doc.setFontSize(14); doc.text("PROPUESTA TÉCNICA", 20, 85);
-    doc.setFontSize(11); doc.setFont("helvetica", "normal");
-    const specs = [
-        `• Estructura: Portón ${d.tipo.toUpperCase()}`,
-        `• Dimensiones: ${d.ancho}m de ancho x ${d.alto}m de alto`,
-        d.modelo ? `• Automatización: Equipo ${d.modelo}` : "• Sistema: Apertura Manual",
-        d.textoAcceso ? `• Acceso: ${d.textoAcceso}` : null,
-        d.lucera === 'si' ? "• Extra: Lucera para iluminación natural" : null
-    ].filter(x => x);
-    let y = 95;
-    specs.forEach(s => { doc.text(s, 25, y); y += 8; });
-    // Agrandamos el alto del recuadro (de 45 a 55) para que entren las nuevas condiciones
-    doc.setFillColor(241, 245, 249); doc.rect(20, y + 5, 170, 55, 'F');
-    doc.setTextColor(30, 41, 59); doc.setFont("helvetica", "bold");
     
-    // Cambiamos levemente el título para incluir las condiciones
-    doc.text("VALOR AGREGADO Y CONDICIONES:", 25, y + 15);
+    // 1. Creamos un objeto de imagen para cargar tu logo
+    const img = new Image();
+    img.src = 'icono.png';
     
-    doc.setFont("helvetica", "normal"); doc.setFontSize(10);
-    doc.text("- Pintura base anticorrosiva y acabados de precisión.", 25, y + 22);
-    doc.text("- Soldadura técnica para máxima durabilidad estructural.", 25, y + 28);
-    doc.text("- Instalación certificada con garantía de 12 meses.", 25, y + 34);
-    
-    // Agregamos el plazo y la seña
-    doc.text("- Plazo de entrega: 30 días hábiles.", 25, y + 40);
-    doc.text("- Condiciones de pago: Seña del 50% al confirmar el trabajo.", 25, y + 46);
-    
-    doc.setFillColor(34, 197, 94); doc.rect(20, 200, 170, 35, 'F');
-    doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text("INVERSIÓN FINAL LLAVE EN MANO", 105, 210, {align: 'center'});
-    doc.setFontSize(26); doc.text(`$${d.total.toLocaleString('es-AR')}`, 105, 225, {align: 'center'});
-    doc.save(`Propuesta_PAC_${d.cliente}.pdf`);
+    // 2. Esperamos a que la imagen cargue para armar el PDF
+    img.onload = function() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // --- MARCA DE AGUA ---
+        // Configuramos la opacidad al 8% (muy clarito)
+        doc.setGState(new doc.GState({opacity: 0.08})); 
+        
+        // Dibujamos la imagen centrada y grande. 
+        // La hoja A4 mide 210x297mm. Le damos 170x170mm de tamaño.
+        doc.addImage(img, 'PNG', 20, 60, 170, 170);
+        
+        // Restauramos la opacidad al 100% para que el resto se vea normal
+        doc.setGState(new doc.GState({opacity: 1}));
+        // -----------------------
+
+        // --- ENCABEZADO ---
+        doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 50, 'F');
+        doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.setFont("helvetica", "bold");
+        doc.text("PAC - APERTURAS", 20, 30);
+        doc.setFontSize(10); doc.text("SISTEMAS AUTOMATIZADOS E INGENIERÍA EN HIERRO", 20, 38);
+        
+        doc.setTextColor(51, 65, 85); doc.setFontSize(12);
+        doc.text(`ATENCIÓN: ${d.cliente.toUpperCase()}`, 20, 65);
+        doc.text(`FECHA: ${d.fecha}`, 150, 65);
+        
+        doc.setDrawColor(59, 130, 246); doc.setLineWidth(1); doc.line(20, 70, 190, 70);
+        
+        doc.setFontSize(14); doc.text("PROPUESTA TÉCNICA", 20, 85);
+        doc.setFontSize(11); doc.setFont("helvetica", "normal");
+        
+        const specs = [
+            `• Estructura: Portón ${d.tipo.toUpperCase()}`,
+            `• Dimensiones: ${d.ancho}m de ancho x ${d.alto}m de alto`,
+            d.modelo ? `• Automatización: Equipo ${d.modelo}` : "• Sistema: Apertura Manual",
+            d.textoAcceso ? `• Acceso: ${d.textoAcceso}` : null,
+            d.lucera === 'si' ? "• Extra: Lucera para iluminación natural" : null
+        ].filter(x => x);
+        
+        let y = 95;
+        specs.forEach(s => { doc.text(s, 25, y); y += 8; });
+        
+        // --- RECUADRO DE CONDICIONES (Actualizado) ---
+        doc.setFillColor(241, 245, 249); doc.rect(20, y + 5, 170, 55, 'F');
+        doc.setTextColor(30, 41, 59); doc.setFont("helvetica", "bold");
+        doc.text("VALOR AGREGADO Y CONDICIONES:", 25, y + 15);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+        doc.text("- Pintura base anticorrosiva y acabados de precisión.", 25, y + 22);
+        doc.text("- Soldadura técnica para máxima durabilidad estructural.", 25, y + 28);
+        doc.text("- Instalación certificada con garantía de 12 meses.", 25, y + 34);
+        doc.text("- Plazo de entrega: 30 días hábiles.", 25, y + 40);
+        doc.text("- Condiciones de pago: Seña del 50% al confirmar el trabajo.", 25, y + 46);
+        
+        // --- TOTAL ---
+        doc.setFillColor(34, 197, 94); doc.rect(20, 200, 170, 35, 'F');
+        doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text("INVERSIÓN FINAL LLAVE EN MANO", 105, 210, {align: 'center'});
+        doc.setFontSize(26); doc.text(`$${d.total.toLocaleString('es-AR')}`, 105, 225, {align: 'center'});
+        
+        doc.save(`Propuesta_PAC_${d.cliente}.pdf`);
+    };
+
+    // Por si hay un error cargando la imagen (ej: archivo no encontrado)
+    img.onerror = function() {
+        alert("Hubo un problema al cargar el archivo icono.png para la marca de agua. Revisá que esté en la misma carpeta.");
+    };
 }
 
 function exportarReporteMensual() {
