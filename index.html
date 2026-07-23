@@ -278,13 +278,22 @@ function generarPDF() {
     ].filter(x => x);
     let y = 95;
     specs.forEach(s => { doc.text(s, 25, y); y += 8; });
-    doc.setFillColor(241, 245, 249); doc.rect(20, y + 5, 170, 45, 'F');
+    // Agrandamos el alto del recuadro (de 45 a 55) para que entren las nuevas condiciones
+    doc.setFillColor(241, 245, 249); doc.rect(20, y + 5, 170, 55, 'F');
     doc.setTextColor(30, 41, 59); doc.setFont("helvetica", "bold");
-    doc.text("VALOR AGREGADO PAC:", 25, y + 15);
+    
+    // Cambiamos levemente el título para incluir las condiciones
+    doc.text("VALOR AGREGADO Y CONDICIONES:", 25, y + 15);
+    
     doc.setFont("helvetica", "normal"); doc.setFontSize(10);
     doc.text("- Pintura base anticorrosiva y acabados de precisión.", 25, y + 22);
     doc.text("- Soldadura técnica para máxima durabilidad estructural.", 25, y + 28);
     doc.text("- Instalación certificada con garantía de 12 meses.", 25, y + 34);
+    
+    // Agregamos el plazo y la seña
+    doc.text("- Plazo de entrega: 30 días hábiles.", 25, y + 40);
+    doc.text("- Condiciones de pago: Seña del 50% al confirmar el trabajo.", 25, y + 46);
+    
     doc.setFillColor(34, 197, 94); doc.rect(20, 200, 170, 35, 'F');
     doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text("INVERSIÓN FINAL LLAVE EN MANO", 105, 210, {align: 'center'});
     doc.setFontSize(26); doc.text(`$${d.total.toLocaleString('es-AR')}`, 105, 225, {align: 'center'});
