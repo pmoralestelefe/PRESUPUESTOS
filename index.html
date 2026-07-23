@@ -258,43 +258,40 @@ function enviarWhatsApp() { window.open(`https://wa.me/54${window.detalle.tel}?t
 function generarPDF() {
     const d = window.detalle;
     
-    // Creamos el objeto de imagen para cargar tu logo
+    // 1. Creamos un objeto de imagen para cargar tu logo
     const img = new Image();
     img.src = 'icono.png';
     
-    // Esperamos a que la imagen cargue para armar el PDF
+    // 2. Esperamos a que la imagen cargue para armar el PDF
     img.onload = function() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
+        
+        // --- MARCA DE AGUA ---
+        // Configuramos la opacidad al 8% (muy clarito)
+        doc.setGState(new doc.GState({opacity: 0.08})); 
+        
+        // Dibujamos la imagen centrada y grande. 
+        // La hoja A4 mide 210x297mm. Le damos 170x170mm de tamaño.
+        doc.addImage(img, 'PNG', 20, 60, 170, 170);
+        
+        // Restauramos la opacidad al 100% para que el resto se vea normal
+        doc.setGState(new doc.GState({opacity: 1}));
+        // -----------------------
 
         // --- ENCABEZADO ---
-        // 1. Dibujamos el fondo azul oscuro
-        doc.setFillColor(15, 23, 42); 
-        doc.rect(0, 0, 210, 50, 'F');
+        doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 50, 'F');
+        doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.setFont("helvetica", "bold");
+        doc.text("PAC - APERTURAS", 20, 30);
+        doc.setFontSize(10); doc.text("SISTEMAS AUTOMATIZADOS E INGENIERÍA EN HIERRO", 20, 38);
         
-        // 2. Colocamos el logo a la izquierda (X: 15, Y: 10, Ancho: 30, Alto: 30)
-        doc.addImage(img, 'PNG', 15, 10, 30, 30);
-
-        // 3. Escribimos los títulos corridos hacia la derecha (X: 50) para no pisar el logo
-        doc.setTextColor(255, 255, 255); 
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(20); // Un poco más chico que antes para que entre el nombre largo
-        doc.text("Portones Automáticos Córdoba", 50, 28);
-        
-        doc.setFontSize(10); 
-        doc.setFont("helvetica", "normal");
-        doc.text("SISTEMAS AUTOMATIZADOS E INGENIERÍA EN HIERRO", 50, 38);
-        
-        // --- DATOS DEL CLIENTE ---
         doc.setTextColor(51, 65, 85); doc.setFontSize(12);
         doc.text(`ATENCIÓN: ${d.cliente.toUpperCase()}`, 20, 65);
         doc.text(`FECHA: ${d.fecha}`, 150, 65);
         
         doc.setDrawColor(59, 130, 246); doc.setLineWidth(1); doc.line(20, 70, 190, 70);
         
-        // --- DETALLE TÉCNICO ---
-        doc.setFontSize(14); doc.setFont("helvetica", "bold");
-        doc.text("PROPUESTA TÉCNICA", 20, 85);
+        doc.setFontSize(14); doc.text("PROPUESTA TÉCNICA", 20, 85);
         doc.setFontSize(11); doc.setFont("helvetica", "normal");
         
         const specs = [
@@ -308,11 +305,10 @@ function generarPDF() {
         let y = 95;
         specs.forEach(s => { doc.text(s, 25, y); y += 8; });
         
-        // --- RECUADRO DE CONDICIONES ---
+        // --- RECUADRO DE CONDICIONES (Actualizado) ---
         doc.setFillColor(241, 245, 249); doc.rect(20, y + 5, 170, 55, 'F');
         doc.setTextColor(30, 41, 59); doc.setFont("helvetica", "bold");
         doc.text("VALOR AGREGADO Y CONDICIONES:", 25, y + 15);
-        
         doc.setFont("helvetica", "normal"); doc.setFontSize(10);
         doc.text("- Pintura base anticorrosiva y acabados de precisión.", 25, y + 22);
         doc.text("- Soldadura técnica para máxima durabilidad estructural.", 25, y + 28);
@@ -322,16 +318,15 @@ function generarPDF() {
         
         // --- TOTAL ---
         doc.setFillColor(34, 197, 94); doc.rect(20, 200, 170, 35, 'F');
-        doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.setFont("helvetica", "bold");
-        doc.text("INVERSIÓN FINAL LLAVE EN MANO", 105, 210, {align: 'center'});
+        doc.setTextColor(255, 255, 255); doc.setFontSize(14); doc.text("INVERSIÓN FINAL LLAVE EN MANO", 105, 210, {align: 'center'});
         doc.setFontSize(26); doc.text(`$${d.total.toLocaleString('es-AR')}`, 105, 225, {align: 'center'});
         
         doc.save(`Propuesta_PAC_${d.cliente}.pdf`);
     };
 
-    // Por si hay un error cargando la imagen
+    // Por si hay un error cargando la imagen (ej: archivo no encontrado)
     img.onerror = function() {
-        alert("Hubo un problema al cargar el archivo icono.png. Revisá que esté en la misma carpeta.");
+        alert("Hubo un problema al cargar el archivo icono.png para la marca de agua. Revisá que esté en la misma carpeta.");
     };
 }
 
