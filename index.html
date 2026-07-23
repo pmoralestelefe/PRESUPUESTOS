@@ -207,7 +207,7 @@ function calcular() {
     document.getElementById('resultado').style.display = 'block';
     document.getElementById('res_total').innerText = `TOTAL: $${total.toLocaleString('es-AR')}`;
     
-    // MENSAJE DE WHATSAPP RESTAURADO
+    // MENSAJE DE WHATSAPP ACTUALIZADO
     window.mensajeWPP = `Hola *${cliente}*, ¡un gusto saludarte! 👋\n\n` +
     `Soy *Emanuel* de *Portones Automáticos Córdoba*. Esta es la propuesta integral para tu hogar:\n\n` +
     `🏠 *Servicio:* ${descServicio} (${tipo.toUpperCase()})\n` +
@@ -215,7 +215,9 @@ function calcular() {
     (window.detalle.modelo ? `⚡ *Tecnología:* Motor ${window.detalle.modelo}\n` : "") +
     (lucera === 'si' ? `✨ *Detalle:* Lucera para iluminación natural\n` : "") +
     (textoAcceso ? `🚪 *Acceso:* ${textoAcceso}\n` : "") +
-    `✅ *Incluye:* Materiales premium, instalación técnica y garantía certificada.\n\n` +
+    `✅ *Incluye:* Materiales premium, instalación técnica y garantía certificada.\n` +
+    `⏳ *Plazo de entrega:* 30 días hábiles.\n` +
+    `💵 *Condiciones:* Seña del 50% para iniciar el trabajo.\n\n` +
     `💰 *INVERSIÓN TOTAL:* $${total.toLocaleString('es-AR')}\n\n` +
     `*¿Te gustaría que agendemos una visita técnica para comenzar?* 🚀`;
 }
