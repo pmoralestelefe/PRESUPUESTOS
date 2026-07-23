@@ -261,7 +261,7 @@ function generarPDF() {
     const d = window.detalle;
     doc.setFillColor(15, 23, 42); doc.rect(0, 0, 210, 50, 'F');
     doc.setTextColor(255, 255, 255); doc.setFontSize(24); doc.setFont("helvetica", "bold");
-    doc.text("PAC - APERTURAS", 20, 30);
+    doc.text("Portones Automáticos Córdoba", 20, 30);
     doc.setFontSize(10); doc.text("SISTEMAS AUTOMATIZADOS E INGENIERÍA EN HIERRO", 20, 38);
     doc.setTextColor(51, 65, 85); doc.setFontSize(12);
     doc.text(`ATENCIÓN: ${d.cliente.toUpperCase()}`, 20, 65);
